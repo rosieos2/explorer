@@ -2,67 +2,31 @@ const { OpenAI } = require('openai');
 const fetch = require('node-fetch');
 const { JSDOM } = require('jsdom');
 
-async function findRelevantSections(content, task) {
-    const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY
-    });
-
-    const completion = await openai.chat.completions.create({
-        model: "gpt-4",
-        messages: [
-            {
-                role: "system",
-                content: "You are an expert at HTML analysis. Based on the content and task, return just a JSON array of CSS selectors that would target the most relevant sections. Keep it focused and specific."
-            },
-            {
-                role: "user",
-                content: `Find CSS selectors for sections relevant to this task: ${task}\n\nContent: ${content.slice(0, 5000)}`
-            }
-        ]
-    });
-
+async function getScreenshots(url, retries = 2) {
     try {
-        return JSON.parse(completion.choices[0].message.content);
-    } catch (e) {
-        console.log('Error parsing selectors, using defaults');
-        return ['.article', '.content', 'main'];
-    }
-}
-
-async function getScreenshots(url, selectors, retries = 2) {
-    const screenshots = [];
-    
-    for (const selector of selectors) {
-        for (let i = 0; i < retries; i++) {
-            try {
-                console.log(`Screenshot attempt ${i + 1} for selector: ${selector}`);
-                const screenshotUrl = `https://api.apiflash.com/v1/urltoimage?access_key=${process.env.APIFLASH_KEY}&url=${encodeURIComponent(url)}&selector=${encodeURIComponent(selector)}&width=800&height=600&fresh=true&response_type=json`;
-                
-                const screenshotResponse = await fetch(screenshotUrl, {
-                    timeout: 5000
-                });
-                
-                if (screenshotResponse.ok) {
-                    const data = await screenshotResponse.json();
-                    const imageResponse = await fetch(data.url, {
-                        timeout: 5000
-                    });
-                    const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
-                    screenshots.push({
-                        selector: selector,
-                        image: imageBuffer.toString('base64')
-                    });
-                    break; // Success, move to next selector
-                }
-            } catch (error) {
-                console.log(`Screenshot attempt ${i + 1} failed for ${selector}:`, error.message);
-                if (i === retries - 1) continue; // Move to next selector on failure
-            }
-            await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log('Getting screenshot');
+        const screenshotUrl = `https://api.apiflash.com/v1/urltoimage?access_key=${process.env.APIFLASH_KEY}&url=${encodeURIComponent(url)}&width=800&height=600&fresh=true&format=jpeg&quality=80&response_type=json&full_page=false`;
+        
+        const screenshotResponse = await fetch(screenshotUrl, {
+            timeout: 8000
+        });
+        
+        if (screenshotResponse.ok) {
+            const data = await screenshotResponse.json();
+            const imageResponse = await fetch(data.url, {
+                timeout: 5000
+            });
+            const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+            return [{
+                label: 'Page Snapshot',
+                image: imageBuffer.toString('base64')
+            }];
         }
+    } catch (error) {
+        console.log('Screenshot failed:', error.message);
     }
     
-    return screenshots;
+    return []; // Return empty array if screenshot fails
 }
 
 module.exports = async (req, res) => {
@@ -104,12 +68,10 @@ module.exports = async (req, res) => {
         const dom = new JSDOM(htmlContent);
         const content = dom.window.document.body.textContent;
 
-        // Get relevant selectors based on the task
-        const relevantSelectors = await findRelevantSections(content, task);
-
-        // Get screenshots of relevant sections
-        console.log('Getting targeted screenshots');
-        const screenshots = await getScreenshots(url, relevantSelectors);
+        // Get screenshots
+        console.log('Getting screenshots');
+        const screenshots = await getScreenshots(url);
+        console.log(`Got ${screenshots.length} screenshots`);
 
         console.log('Making OpenAI request for analysis');
         const completion = await openai.chat.completions.create({
@@ -126,14 +88,14 @@ module.exports = async (req, res) => {
             ]
         });
 
-        console.log('Sending successful response with screenshots:', screenshots.length);
-return res.status(200).json({
-    success: true,
-    data: {
-        analysis: completion.choices[0].message.content,
-        screenshots: screenshots  // Make sure this is populated
-    }
-});
+        console.log('Sending successful response');
+        return res.status(200).json({
+            success: true,
+            data: {
+                analysis: completion.choices[0].message.content,
+                screenshots: screenshots
+            }
+        });
 
     } catch (error) {
         console.error('Detailed API Error:', {
