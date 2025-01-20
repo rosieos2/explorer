@@ -54,21 +54,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function displayResults(data) {
-        // Debug log to see what data we're receiving
-        console.log('Received data:', data);
-    
-        // Display screenshots if they exist
-        if (data.screenshots && data.screenshots.length > 0) {
-            console.log('Found screenshots:', data.screenshots.length);
-            displayScreenshots(data.screenshots);
-        } else {
-            console.log('No screenshots found in data');
+        // Display sources if available
+        let sourcesHtml = '';
+        if (data.sources && data.sources.length > 0) {
+            sourcesHtml = `
+                <div class="section sources-section">
+                    <div class="section-title">Sources Analyzed</div>
+                    <div class="sources-list">
+                        ${data.sources.map(source => `
+                            <div class="source-item">
+                                <span class="source-url">${source}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
         }
     
         const analysis = data.analysis;
         const sections = parseAnalysis(analysis);
     
         resultDiv.innerHTML = `
+            ${sourcesHtml}
             <div class="section">
                 <div class="section-title">Analysis Results</div>
                 ${formatSectionContent(sections.content)}
@@ -120,7 +127,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                      alt="Relevant content section">
                             </div>
                             <div class="screenshot-caption">
-                                Found in ${shot.selector}
+                                Source: ${shot.source || 'Unknown'}
                             </div>
                         </div>
                     `).join('')}
