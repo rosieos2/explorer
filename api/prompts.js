@@ -8,11 +8,7 @@ async function connectToDatabase() {
     }
     
     try {
-        const client = await MongoClient.connect(process.env.MONGODB_URI, {
-            minVersion: 'TLS1_2',
-            maxVersion: 'TLS1_3'
-        });
-        
+        const client = await MongoClient.connect(process.env.MONGODB_URI);
         const db = client.db("webagent");
         cachedDb = db;
         return db;
