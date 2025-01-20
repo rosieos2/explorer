@@ -30,17 +30,22 @@ async function getScreenshots(url, retries = 2) {
 }
 
 async function findRelevantSources(task) {
-    // Ask GPT to suggest relevant URLs based on the task
     const openai = new OpenAI({
         apiKey: process.env.OPENAI_API_KEY
     });
 
+    // Enhanced prompt for better source suggestions
     const completion = await openai.chat.completions.create({
         model: "gpt-4",
         messages: [
             {
                 role: "system",
-                content: "You are an expert at finding relevant and reliable web sources. When given a task, suggest 2-3 specific URLs that would be most helpful for that task. Return only a JSON array of URLs, nothing else."
+                content: `You are an expert at finding relevant and reliable web sources. When given a task, suggest 3-5 specific URLs that would be most helpful for that task. Consider:
+                - Official websites and directories
+                - Reputable review sites
+                - Local business listings
+                - Specialized forums or communities
+                Return only a JSON array of URLs, nothing else.`
             },
             {
                 role: "user",
@@ -68,12 +73,24 @@ async function analyzeSite(url, task) {
         });
         const htmlContent = await pageResponse.text();
         const dom = new JSDOM(htmlContent);
-        const content = dom.window.document.body.textContent;
+        
+        // Enhanced content extraction
+        const content = {
+            text: dom.window.document.body.textContent,
+            title: dom.window.document.title,
+            headings: Array.from(dom.window.document.querySelectorAll('h1, h2, h3'))
+                .map(h => h.textContent.trim())
+                .filter(Boolean),
+            links: Array.from(dom.window.document.querySelectorAll('a'))
+                .map(a => ({ text: a.textContent.trim(), href: a.href }))
+                .filter(l => l.text && l.href)
+        };
+
         const screenshots = await getScreenshots(url);
 
         return {
             url,
-            content: content.slice(0, 15000),
+            content: JSON.stringify(content).slice(0, 15000), // Stringify the structured content
             screenshots
         };
     } catch (error) {
@@ -83,16 +100,14 @@ async function analyzeSite(url, task) {
 }
 
 module.exports = async (req, res) => {
-    console.log('API endpoint hit');
-
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { url, task } = req.body;
+    const { task } = req.body;
 
-    if (!url && !task) {
-        return res.status(400).json({ error: 'URL or task is required' });
+    if (!task) {
+        return res.status(400).json({ error: 'Task is required' });
     }
 
     try {
@@ -104,30 +119,25 @@ module.exports = async (req, res) => {
             apiKey: process.env.OPENAI_API_KEY
         });
 
-        let sitesData = [];
+        console.log('Finding relevant sources for task:', task);
+        const relevantUrls = await findRelevantSources(task);
+        console.log('Found relevant URLs:', relevantUrls);
 
-        if (url) {
-            // Single site analysis
-            const siteData = await analyzeSite(url, task);
-            if (siteData) sitesData.push(siteData);
-        } else {
-            // Multi-site analysis based on task
-            console.log('Finding relevant sources for task:', task);
-            const relevantUrls = await findRelevantSources(task);
-            console.log('Found relevant URLs:', relevantUrls);
-
-            const analysisPromises = relevantUrls.map(url => analyzeSite(url, task));
-            sitesData = (await Promise.all(analysisPromises)).filter(Boolean);
-        }
+        const analysisPromises = relevantUrls.map(url => analyzeSite(url, task));
+        const sitesData = (await Promise.all(analysisPromises)).filter(Boolean);
 
         if (sitesData.length === 0) {
             throw new Error('Failed to analyze any sites');
         }
 
         // Combine content from all sites for analysis
-        const combinedContent = sitesData.map(site => 
-            `Content from ${site.url}:\n${site.content}`
-        ).join('\n\n');
+        const combinedContent = sitesData.map(site => {
+            const content = JSON.parse(site.content);
+            return `Content from ${site.url}:
+Title: ${content.title}
+Main Headings: ${content.headings.join(' | ')}
+Key Information: ${content.text.slice(0, 1000)}`;
+        }).join('\n\n');
 
         console.log('Making OpenAI request for analysis');
         const completion = await openai.chat.completions.create({
@@ -135,7 +145,14 @@ module.exports = async (req, res) => {
             messages: [
                 {
                     role: "system",
-                    content: "Analyze the content provided and give a comprehensive answer to the user's task. Present information in clear, numbered points. For each point, cite the source URL. If you find conflicting information, note the discrepancies."
+                    content: `Analyze the content provided and give a comprehensive answer to the user's task. Follow these guidelines:
+                    - Present information in clear, numbered points
+                    - For each point, cite the source URL
+                    - Highlight key facts and details
+                    - Note any discrepancies between sources
+                    - Include relevant contact information or addresses if available
+                    - Add any important warnings or considerations
+                    Keep the response concise but informative.`
                 },
                 {
                     role: "user",
