@@ -2,38 +2,32 @@ const { OpenAI } = require('openai');
 const fetch = require('node-fetch');
 const { JSDOM } = require('jsdom');
 
-// Search API configuration
+// API and configuration constants
 const SEARCH_API_KEY = process.env.BING_API_KEY;
 const SEARCH_ENDPOINT = 'https://api.bing.microsoft.com/v7.0/search';
 const FETCH_TIMEOUT = 15000;
 const SCREENSHOT_TIMEOUT = 20000;
 
-async function getScreenshots(url, task) {
+async function getScreenshots(url) {
     try {
         console.log('Getting screenshot for:', url);
-        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Only take screenshots of pages that are likely to have valuable visual content
-        if (url.includes('video') || url.includes('gallery') || url.includes('image') || 
-            url.includes('photo') || url.includes('watch') || url.includes('highlights')) {
-            
-            const screenshotUrl = `https://api.apiflash.com/v1/urltoimage?access_key=${process.env.APIFLASH_KEY}&url=${encodeURIComponent(url)}&width=600&height=400&fresh=true&format=jpeg&quality=60&response_type=json&full_page=false&delay=2`;
-            
-            const screenshotResponse = await fetch(screenshotUrl, {
-                timeout: SCREENSHOT_TIMEOUT
+        const screenshotUrl = `https://api.apiflash.com/v1/urltoimage?access_key=${process.env.APIFLASH_KEY}&url=${encodeURIComponent(url)}&width=800&height=600&fresh=true&format=jpeg&quality=80&response_type=json&full_page=false`;
+        
+        const screenshotResponse = await fetch(screenshotUrl, {
+            timeout: SCREENSHOT_TIMEOUT
+        });
+        
+        if (screenshotResponse.ok) {
+            const data = await screenshotResponse.json();
+            const imageResponse = await fetch(data.url, {
+                timeout: FETCH_TIMEOUT
             });
-            
-            if (screenshotResponse.ok) {
-                const data = await screenshotResponse.json();
-                const imageResponse = await fetch(data.url, {
-                    timeout: FETCH_TIMEOUT
-                });
-                const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
-                return [{
-                    label: 'Relevant Content',
-                    image: imageBuffer.toString('base64')
-                }];
-            }
+            const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+            return [{
+                label: url,
+                image: imageBuffer.toString('base64')
+            }];
         }
     } catch (error) {
         console.log('Screenshot failed:', error.message);
@@ -43,7 +37,6 @@ async function getScreenshots(url, task) {
 
 async function findRelevantSources(query) {
     try {
-        // First, optimize the search query using GPT
         const openai = new OpenAI({
             apiKey: process.env.OPENAI_API_KEY
         });
@@ -53,46 +46,57 @@ async function findRelevantSources(query) {
             messages: [
                 {
                     role: "system",
-                    content: "Convert user queries into optimal search terms that will find the most relevant and recent information. Think like a human performing a web search. Return only the optimized search query."
+                    content: "You are a search optimization expert. Your task is to:" +
+                            "1. Analyze the user's query and identify key topics/entities" +
+                            "2. Add relevant context and specific terms to improve search accuracy" +
+                            "3. Include time-based terms for recent information if appropriate" +
+                            "4. Format the query to maximize relevance in web searches" +
+                            "Return only the optimized search query, no explanations."
                 },
                 {
                     role: "user",
                     content: query
                 }
             ],
-            max_tokens: 50
+            max_tokens: 100
         });
 
         const searchQuery = searchCompletion.choices[0].message.content;
         
-        // Perform web search with Bing API
-        const searchResponse = await fetch(`${SEARCH_ENDPOINT}?q=${encodeURIComponent(searchQuery)}&count=10&responseFilter=Webpages`, {
-            headers: {
-                'Ocp-Apim-Subscription-Key': SEARCH_API_KEY
-            }
-        });
+        // Perform multiple searches with different freshness parameters
+        const searchResponses = await Promise.all([
+            fetch(`${SEARCH_ENDPOINT}?q=${encodeURIComponent(searchQuery)}&count=10&responseFilter=Webpages&freshness=Day`, {
+                headers: {
+                    'Ocp-Apim-Subscription-Key': SEARCH_API_KEY
+                }
+            }),
+            fetch(`${SEARCH_ENDPOINT}?q=${encodeURIComponent(searchQuery)}&count=10&responseFilter=Webpages&freshness=Week`, {
+                headers: {
+                    'Ocp-Apim-Subscription-Key': SEARCH_API_KEY
+                }
+            })
+        ]);
 
-        if (!searchResponse.ok) {
-            throw new Error('Search API error');
-        }
-
-        const searchResults = await searchResponse.json();
+        const results = await Promise.all(searchResponses.map(response => response.json()));
         
-        // Just return valid URLs from the search results
-        if (searchResults?.webPages?.value) {
-            return searchResults.webPages.value
-                .map(result => result.url)
-                .filter(url => {
+        // Combine and deduplicate results
+        const urls = new Set();
+        results.forEach(result => {
+            if (result?.webPages?.value) {
+                result.webPages.value.forEach(page => {
                     try {
-                        const urlObj = new URL(url);
-                        return urlObj.protocol === 'https:' || urlObj.protocol === 'http:';
+                        const url = new URL(page.url);
+                        if (url.protocol === 'https:' || url.protocol === 'http:') {
+                            urls.add(page.url);
+                        }
                     } catch {
-                        return false;
+                        // Invalid URL, skip
                     }
                 });
-        }
+            }
+        });
         
-        return [];
+        return Array.from(urls);
 
     } catch (error) {
         console.error('Search error:', error);
@@ -100,20 +104,26 @@ async function findRelevantSources(query) {
     }
 }
 
-// Separate function for fallback sources
-function getFallbackSources(query) {
-    const cleanQuery = encodeURIComponent(query);
-    
-    // General-purpose fallback sources
-    const fallbackSources = [
-        `https://www.reuters.com/search/news?blob=${cleanQuery}`,
-        `https://www.bbc.com/search?q=${cleanQuery}`,
-        `https://www.theguardian.com/search?q=${cleanQuery}`,
-        `https://medium.com/search?q=${cleanQuery}`,
-        `https://wikipedia.org/wiki/Special:Search?search=${cleanQuery}`
+function extractMainContent(document) {
+    const contentSelectors = [
+        'article',
+        'main',
+        '[role="main"]',
+        '[class*="article"]',
+        '[class*="post"]',
+        '[class*="content"]'
     ];
 
-    return fallbackSources;
+    for (const selector of contentSelectors) {
+        const element = document.querySelector(selector);
+        if (element) {
+            const text = element.textContent.trim();
+            if (text.length > 100) {
+                return text;
+            }
+        }
+    }
+    return null;
 }
 
 async function analyzeSite(url, task) {
@@ -135,19 +145,19 @@ async function analyzeSite(url, task) {
         const html = await response.text();
         const dom = new JSDOM(html);
 
-        // Extract main content
+        // Enhanced content extraction
         const mainContent = {
             title: dom.window.document.title,
-            article: dom.window.document.querySelector('article')?.textContent?.trim(),
+            article: extractMainContent(dom.window.document),
             headings: Array.from(dom.window.document.querySelectorAll('h1, h2, h3'))
                 .map(h => h.textContent.trim())
                 .filter(Boolean)
-                .slice(0, 10),
-            paragraphs: Array.from(dom.window.document.querySelectorAll('article p, main p, .content p'))
+                .slice(0, 15),
+            paragraphs: Array.from(dom.window.document.querySelectorAll('article p, main p, .content p, [class*="article"] p, [class*="post"] p'))
                 .map(p => p.textContent.trim())
                 .filter(Boolean)
-                .filter(text => text.length > 50)
-                .slice(0, 20)
+                .filter(text => text.length > 40)
+                .slice(0, 30)
         };
 
         const screenshots = await getScreenshots(url);
@@ -163,7 +173,46 @@ async function analyzeSite(url, task) {
     }
 }
 
-module.exports = async (req, res) => {
+async function analyzeContent(task, sitesData) {
+    const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY
+    });
+
+    const combinedContent = sitesData.map(site => {
+        const content = JSON.parse(site.content);
+        return `URL: ${site.url}
+${content.title}
+${content.headings?.join('\n') || ''}
+${content.paragraphs?.join('\n') || ''}`;
+    }).join('\n\n').slice(0, 15000);
+
+    const completion = await openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+            {
+                role: "system",
+                content: `You are a precise information analyzer. Your task is to:
+1. Analyze the provided content and extract information specifically relevant to the user's query
+2. Ensure all information is directly related to the query - discard irrelevant information
+3. Present findings in clear, concise bullet points
+4. Include specific details like names, dates, and quotes when available
+5. Do not include source citations or URLs in the output
+6. If information seems unrelated to the query, exclude it entirely
+
+Format your response as a series of clear bullet points. Each point should be self-contained and directly related to the query.`
+            },
+            {
+                role: "user",
+                content: `Query: ${task}\n\nContent to analyze:\n${combinedContent}`
+            }
+        ],
+        max_tokens: 1000
+    });
+
+    return completion.choices[0].message.content;
+}
+
+async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
@@ -175,6 +224,7 @@ module.exports = async (req, res) => {
     }
 
     try {
+        // Validate API keys
         if (!process.env.OPENAI_API_KEY) {
             throw new Error('OpenAI API key is not configured');
         }
@@ -183,9 +233,9 @@ module.exports = async (req, res) => {
             throw new Error('Search API key is not configured');
         }
 
-        const openai = new OpenAI({
-            apiKey: process.env.OPENAI_API_KEY
-        });
+        if (!process.env.APIFLASH_KEY) {
+            throw new Error('APIFlash key is not configured');
+        }
 
         console.log('Finding relevant sources for task:', task);
         const relevantUrls = await findRelevantSources(task);
@@ -198,38 +248,7 @@ module.exports = async (req, res) => {
             throw new Error('Failed to analyze any sites');
         }
 
-        // Format content for analysis
-        const combinedContent = sitesData.map(site => {
-            const content = JSON.parse(site.content);
-            return `Content from ${site.url}:
-Title: ${content.title}
-Key Information:
-${content.headings?.join('\n') || ''}
-${content.paragraphs?.join('\n') || ''}`;
-        }).join('\n\n').slice(0, 12000);
-
-        console.log('Making OpenAI request for analysis');
-        const completion = await openai.chat.completions.create({
-            model: "gpt-4",
-            messages: [
-                {
-                    role: "system",
-                    content: "You are a precise and factual information provider. When analyzing content:" +
-                             "1. Always provide specific, concrete information" +
-                             "2. Include names, addresses, and details when available" +
-                             "3. If exact information isn't found, explicitly state that and suggest what specific information is missing" +
-                             "4. Don't add conversational fluff or general context if not asked" +
-                             "5. Present information in clear, numbered points" +
-                             "6. Focus only on answering exactly what was asked" +
-                             "If no specific information is found, state clearly: 'No specific information found for [query]. Consider searching for: [specific alternative search terms]'"
-                },
-                {
-                    role: "user",
-                    content: `Task: ${task}\n\n${combinedContent}`
-                }
-            ],
-            max_tokens: 1000
-        });
+        const analysis = await analyzeContent(task, sitesData);
 
         const allScreenshots = sitesData.flatMap(site => 
             site.screenshots.map(shot => ({
@@ -241,7 +260,7 @@ ${content.paragraphs?.join('\n') || ''}`;
         return res.status(200).json({
             success: true,
             data: {
-                analysis: completion.choices[0].message.content,
+                analysis,
                 screenshots: allScreenshots,
                 sources: sitesData.map(site => site.url)
             }
@@ -253,4 +272,6 @@ ${content.paragraphs?.join('\n') || ''}`;
             error: error.message
         });
     }
-};
+}
+
+module.exports = handler;
