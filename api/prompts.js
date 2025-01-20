@@ -9,11 +9,8 @@ async function connectToDatabase() {
     
     try {
         const client = await MongoClient.connect(process.env.MONGODB_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
             ssl: true,
             tls: true,
-            tlsAllowInvalidCertificates: false,
             retryWrites: true
         });
         
