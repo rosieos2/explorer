@@ -1,4 +1,6 @@
 const { OpenAI } = require('openai');
+const fetch = require('node-fetch');
+const { JSDOM } = require('jsdom');
 
 module.exports = async (req, res) => {
     console.log('API endpoint hit');
@@ -31,13 +33,17 @@ module.exports = async (req, res) => {
         // Get webpage content using fetch
         console.log('Fetching webpage content');
         const pageResponse = await fetch(url);
-        const content = await pageResponse.text();
+        const htmlContent = await pageResponse.text();
 
-        // Get screenshot using an API service
+        // Use JSDOM to parse HTML and get text content
+        const dom = new JSDOM(htmlContent);
+        const content = dom.window.document.body.textContent;
+
+        // Get screenshot using APIFlash
         console.log('Getting screenshot');
         const screenshotUrl = `https://api.apiflash.com/v1/urltoimage?access_key=${process.env.APIFLASH_KEY}&url=${encodeURIComponent(url)}&full_page=true&fresh=true`;
         const screenshotResponse = await fetch(screenshotUrl);
-        const screenshot = await screenshotResponse.buffer();
+        const screenshot = Buffer.from(await screenshotResponse.arrayBuffer());
         const base64Screenshot = screenshot.toString('base64');
 
         console.log('Making OpenAI request');
@@ -46,11 +52,11 @@ module.exports = async (req, res) => {
             messages: [
                 {
                     role: "system",
-                    content: "You are a web analysis expert. Analyze the content and provide relevant information."
+                    content: "You are a web analysis expert. Analyze the content and provide relevant information. Format your response in clear, numbered points. Focus on the specific task requested."
                 },
                 {
                     role: "user",
-                    content: `Analyze this webpage content for the task: ${task}\n\nContent: ${content}`
+                    content: `Analyze this webpage content for the task: ${task}\n\nContent: ${content.slice(0, 15000)}`
                 }
             ]
         });
