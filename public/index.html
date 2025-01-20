@@ -276,6 +276,137 @@
         .screenshots {
             margin-top: 30px;
         }
+
+        /* Integration Section Styles */
+        .integration-section {
+            background: linear-gradient(180deg, var(--background-color) 0%, #1A202C 100%);
+            padding: 80px 0;
+            color: white;
+        }
+
+        .integration-section h2 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-align: center;
+            margin-bottom: 16px;
+            color: white;
+        }
+
+        .integration-subtitle {
+            text-align: center;
+            color: #A0AEC0;
+            margin-bottom: 48px;
+            font-size: 1.2rem;
+        }
+
+        .code-showcase {
+            background: #1A202C;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 48px;
+        }
+
+        .code-tabs {
+            display: flex;
+            background: #2D3748;
+            padding: 8px;
+            gap: 8px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: #A0AEC0;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .tab-btn.active {
+            background: #4A5568;
+            color: white;
+        }
+
+        .copy-btn {
+            margin-left: auto;
+            background: transparent;
+            border: none;
+            color: #A0AEC0;
+            padding: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            width: auto;
+        }
+
+        .copy-btn:hover {
+            color: white;
+            transform: none;
+        }
+
+        .code-block {
+            padding: 24px;
+            margin: 0;
+            color: #E2E8F0;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            margin-top: 48px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 32px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-icon {
+            background: var(--accent-color);
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .feature-icon svg {
+            color: white;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: white;
+        }
+
+        .feature-card p {
+            color: #A0AEC0;
+            margin-bottom: 24px;
+        }
+
+        .feature-link {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .feature-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -301,7 +432,7 @@
     <div class="container">
         <div class="hero">
             <h1>Web Agent</h1>
-            <p>Automate your web tasks with our powerful agent. Just describe what you need.</p>
+            <p>Automate your web tasks with our powerful agent. Just enter a URL and describe what you need.</p>
         </div>
         
         <div class="form-container">
@@ -323,6 +454,70 @@
             <div id="result"></div>
             
             <div class="screenshots" id="screenshots"></div>
+        </div>
+    </div>
+
+    <!-- Integration Section -->
+    <div class="integration-section">
+        <div class="container">
+            <h2>Integrate today</h2>
+            <p class="integration-subtitle">Enhance your applications with powerful AI agent capabilities.</p>
+            
+            <div class="code-showcase">
+                <div class="code-tabs">
+                    <button class="tab-btn active">JavaScript</button>
+                    <button class="tab-btn">Python</button>
+                    <button class="tab-btn">curl</button>
+                    <button class="copy-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                    </button>
+                </div>
+                <pre class="code-block"><code>// Install the package
+npm install web-agent
+
+// Initialize the agent
+import { WebAgent } from 'web-agent';
+
+const agent = new WebAgent({
+  apiKey: "YOUR_API_KEY"
+});
+
+// Run a task
+const result = await agent.run({
+  task: "Describe what you want the agent to do"
+});
+
+console.log(result);</code></pre>
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 7h-9"></path>
+                            <path d="M14 17H5"></path>
+                            <circle cx="17" cy="17" r="3"></circle>
+                            <circle cx="7" cy="7" r="3"></circle>
+                        </svg>
+                    </div>
+                    <h3>Open Source</h3>
+                    <p>Fork, contribute, and customize to your needs. Join our community of developers.</p>
+                    <a href="https://github.com/yourusername/web-agent" class="feature-link">View on GitHub →</a>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2v20"></path>
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                        </svg>
+                    </div>
+                    <h3>Free to Start</h3>
+                    <p>Begin with our free tier and scale as your needs grow. No credit card required.</p>
+                </div>
+            </div>
         </div>
     </div>
 
