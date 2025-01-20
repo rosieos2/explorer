@@ -11,86 +11,110 @@ module.exports = async (req, res) => {
     console.log('Processing:', { url, task });
 
     try {
-        // Fetch webpage
-        const response = await fetch(url);
+        // Fetch webpage with proper headers
+        const response = await fetch(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache'
+            }
+        });
+
         const html = await response.text();
+        
+        // Try to fetch any API endpoints found in the HTML
+        const apiEndpoints = html.match(/https?:\/\/[^"']+api[^"']*/g) || [];
+        let additionalContent = '';
+        
+        // Try to fetch from API endpoints if found
+        for (const endpoint of apiEndpoints.slice(0, 3)) { // Limit to first 3 endpoints
+            try {
+                const apiResponse = await fetch(endpoint, {
+                    headers: { 'Accept': 'application/json' }
+                });
+                const json = await apiResponse.json();
+                additionalContent += JSON.stringify(json);
+            } catch (e) {
+                console.log('API fetch failed:', e.message);
+            }
+        }
+
         const dom = new JSDOM(html);
         const document = dom.window.document;
 
-        // Extract page content
         function extractContent() {
-            // Get main content areas
-            const mainContent = {
-                title: document.title,
-                meta: {
-                    description: document.querySelector('meta[name="description"]')?.content || '',
-                    keywords: document.querySelector('meta[name="keywords"]')?.content || ''
-                },
-                headings: [],
+            const content = {
+                mainContent: '',
                 articles: [],
-                paragraphs: [],
-                lists: [],
+                links: new Set(),
+                relevantText: []
             };
 
-            // Get all headings
-            ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].forEach(tag => {
-                const headings = document.querySelectorAll(tag);
-                headings.forEach(h => {
-                    mainContent.headings.push({
-                        level: tag,
-                        text: h.textContent.trim()
-                    });
+            // Extract visible text content
+            const walker = document.createTreeWalker(
+                document.body,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+
+            while (walker.nextNode()) {
+                const node = walker.currentNode;
+                const text = node.textContent.trim();
+                if (text && node.parentElement.offsetParent !== null) {
+                    content.relevantText.push(text);
+                }
+            }
+
+            // Get all links with their text
+            document.querySelectorAll('a').forEach(link => {
+                const text = link.textContent.trim();
+                const href = link.href;
+                if (text && href) {
+                    content.links.add(`${text} (${href})`);
+                }
+            });
+
+            // Get main content areas
+            ['article', 'main', '[role="main"]', '.content', '.main'].forEach(selector => {
+                document.querySelectorAll(selector).forEach(el => {
+                    content.mainContent += el.textContent.trim() + '\\n';
                 });
             });
 
-            // Get article content
-            document.querySelectorAll('article, [role="article"], .article, .post, .content').forEach(article => {
-                const content = article.textContent.trim();
-                if (content) {
-                    mainContent.articles.push(content);
+            // Get individual articles or content blocks
+            document.querySelectorAll('article, .article, .post, .content-block').forEach(article => {
+                const title = article.querySelector('h1, h2, h3')?.textContent.trim() || '';
+                const text = article.textContent.trim();
+                if (text) {
+                    content.articles.push({ title, text });
                 }
             });
 
-            // Get paragraph content
-            document.querySelectorAll('p').forEach(p => {
-                const content = p.textContent.trim();
-                if (content) {
-                    mainContent.paragraphs.push(content);
-                }
-            });
-
-            // Get list content
-            document.querySelectorAll('ul, ol').forEach(list => {
-                const items = Array.from(list.querySelectorAll('li'))
-                    .map(li => li.textContent.trim())
-                    .filter(Boolean);
-                if (items.length) {
-                    mainContent.lists.push(items);
-                }
-            });
-
-            return mainContent;
+            return content;
         }
 
-        const pageContent = extractContent();
+        const content = extractContent();
 
-        // Format content for GPT
-        const formattedContent = `
-Page Title: ${pageContent.title}
+        // Combine all content
+        const combinedContent = `
+            Main Content:
+            ${content.mainContent}
 
-Meta Description: ${pageContent.meta.description}
+            Articles:
+            ${content.articles.map(a => `${a.title}\n${a.text}`).join('\n\n')}
 
-Main Headings:
-${pageContent.headings.map(h => `${h.level}: ${h.text}`).join('\n')}
+            Additional Content:
+            ${content.relevantText.join('\n')}
 
-Main Content:
-${pageContent.articles.slice(0, 5).join('\n\n')}
+            Links:
+            ${Array.from(content.links).join('\n')}
 
-Additional Content:
-${pageContent.paragraphs.slice(0, 10).join('\n')}
-
-Key Lists:
-${pageContent.lists.map(list => list.join('\n- ')).join('\n\n')}`;
+            API Content:
+            ${additionalContent}
+        `;
 
         // Initialize OpenAI
         const openai = new OpenAI({
@@ -102,11 +126,11 @@ ${pageContent.lists.map(list => list.join('\n- ')).join('\n\n')}`;
             messages: [
                 { 
                     role: "system", 
-                    content: "You are a web content analysis expert. Analyze the provided content and complete the user's specific task. Be thorough but concise."
+                    content: "You are a web content analyzer. Extract and analyze ALL relevant information from the provided content. Be thorough and specific."
                 },
                 { 
                     role: "user", 
-                    content: `Task: ${task}\n\nWebpage Content:\n${formattedContent.slice(0, 3000)}`
+                    content: `Task: ${task}\n\nContent:\n${combinedContent.slice(0, 4000)}`
                 }
             ],
             max_tokens: 1000
@@ -117,13 +141,9 @@ ${pageContent.lists.map(list => list.join('\n- ')).join('\n\n')}`;
             data: {
                 analysis: completion.choices[0].message.content,
                 metadata: {
-                    title: pageContent.title,
-                    url: url,
-                    contentStats: {
-                        headings: pageContent.headings.length,
-                        articles: pageContent.articles.length,
-                        paragraphs: pageContent.paragraphs.length
-                    }
+                    articlesFound: content.articles.length,
+                    contentLength: combinedContent.length,
+                    linksFound: content.links.size
                 }
             }
         });
