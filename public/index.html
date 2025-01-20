@@ -64,6 +64,35 @@
             margin-bottom: 24px;
         }
 
+        .screenshots-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+    margin-top: 20px;
+}
+
+.sources-section {
+    margin-bottom: 24px;
+}
+
+.sources-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.source-item {
+    background: #EDF2F7;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: #4A5568;
+}
+
+.source-url {
+    word-break: break-all;
+}
+
         label {
             display: block;
             font-weight: 600;
