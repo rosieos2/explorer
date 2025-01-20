@@ -53,7 +53,7 @@ async function findRelevantSources(query) {
             messages: [
                 {
                     role: "system",
-                    content: "Convert user queries into optimal search terms. Focus on relevance and recency. For news queries, add 'news' if not present. Return only the search query, no explanation."
+                    content: "Convert user queries into optimal search terms. Focus on relevance and recency. Add relevant terms based on context (e.g., 'news' for current events, 'review' for products, 'guide' for how-to queries). Return only the search query, no explanation."
                 },
                 {
                     role: "user",
@@ -112,11 +112,15 @@ async function findRelevantSources(query) {
 
 // Separate function for fallback sources
 function getFallbackSources(query) {
+    const cleanQuery = encodeURIComponent(query);
+    
+    // General-purpose fallback sources
     const fallbackSources = [
-        `https://www.bbc.com/sport/football/${query.toLowerCase()}`,
-        `https://www.skysports.com/search?q=${encodeURIComponent(query)}`,
-        `https://www.espn.com/search/_/q/${encodeURIComponent(query)}`,
-        `https://www.goal.com/search?q=${encodeURIComponent(query)}`
+        `https://www.reuters.com/search/news?blob=${cleanQuery}`,
+        `https://www.bbc.com/search?q=${cleanQuery}`,
+        `https://www.theguardian.com/search?q=${cleanQuery}`,
+        `https://medium.com/search?q=${cleanQuery}`,
+        `https://wikipedia.org/wiki/Special:Search?search=${cleanQuery}`
     ];
 
     return fallbackSources;
