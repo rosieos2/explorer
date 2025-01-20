@@ -382,25 +382,20 @@
 </head>
 <body>
     <div class="container">
-        <div class="hero">
-            <h1>Web Agent</h1>
-            <p>Automate your web tasks with our powerful agent. Just enter a URL and describe what you need.</p>
-        </div>
+    <div class="hero">
+    <h1>Web Agent</h1>
+    <p>Ask our web agent anything, and it will search and analyze the web for you.</p>
+</div>
         
         <div class="form-container">
-            <form id="agentForm">
-                <div class="form-group">
-                    <label for="url">Website URL</label>
-                    <input type="url" id="url" required 
-                           placeholder="https://example.com">
-                </div>
-                <div class="form-group">
-                    <label for="task">Task Description</label>
-                    <textarea id="task" required 
-                              placeholder="Describe what you want the agent to do (e.g., 'collect news headlines' or 'take screenshots of product images')"></textarea>
-                </div>
-                <button type="submit" id="submitBtn">Run Agent</button>
-            </form>
+        <form id="agentForm">
+        <div class="form-group">
+            <label for="task">What would you like to find?</label>
+            <textarea id="task" required 
+                      placeholder="Ask anything (e.g., 'find good Muay Thai gyms in London' or 'search for best Italian restaurants in New York')"></textarea>
+        </div>
+        <button type="submit" id="submitBtn">Search Web</button>
+    </form>
             
             <div class="loading" id="loading">
                 Processing your request...
