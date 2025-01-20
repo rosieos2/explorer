@@ -8,18 +8,13 @@ async function connectToDatabase() {
     }
     
     try {
-        const options = {
-            useUnifiedTopology: true,
-            directConnection: true
-        };
-
-        const client = await MongoClient.connect(process.env.MONGODB_URI, options);
+        const client = await MongoClient.connect(process.env.MONGODB_URI);
         
         // Send a ping to confirm a successful connection
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
         
-        const db = client.db("webagent");
+        const db = client.db("prompts");
         cachedDb = db;
         return db;
     } catch (error) {
