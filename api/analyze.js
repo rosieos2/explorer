@@ -11,85 +11,54 @@ module.exports = async (req, res) => {
     console.log('Processing:', { url, task });
 
     try {
-        // Fetch webpage with proper headers
+        // Fetch webpage with browser-like headers
         const response = await fetch(url, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
                 'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5',
-                'Cache-Control': 'no-cache',
-                'Pragma': 'no-cache'
+                'Accept-Language': 'en-US,en;q=0.5'
             }
         });
 
         const html = await response.text();
-        
-        // Try to fetch any API endpoints found in the HTML
-        const apiEndpoints = html.match(/https?:\/\/[^"']+api[^"']*/g) || [];
-        let additionalContent = '';
-        
-        // Try to fetch from API endpoints if found
-        for (const endpoint of apiEndpoints.slice(0, 3)) { // Limit to first 3 endpoints
-            try {
-                const apiResponse = await fetch(endpoint, {
-                    headers: { 'Accept': 'application/json' }
-                });
-                const json = await apiResponse.json();
-                additionalContent += JSON.stringify(json);
-            } catch (e) {
-                console.log('API fetch failed:', e.message);
-            }
-        }
-
         const dom = new JSDOM(html);
         const document = dom.window.document;
 
+        // Extract content more reliably
         function extractContent() {
             const content = {
-                mainContent: '',
-                articles: [],
-                links: new Set(),
-                relevantText: []
+                title: document.title,
+                headings: [],
+                paragraphs: [],
+                links: []
             };
 
-            // Extract visible text content
-            const walker = document.createTreeWalker(
-                document.body,
-                NodeFilter.SHOW_TEXT,
-                null,
-                false
-            );
-
-            while (walker.nextNode()) {
-                const node = walker.currentNode;
-                const text = node.textContent.trim();
-                if (text && node.parentElement.offsetParent !== null) {
-                    content.relevantText.push(text);
+            // Extract headings
+            document.querySelectorAll('h1, h2, h3, h4').forEach(heading => {
+                const text = heading.textContent.trim();
+                if (text) {
+                    content.headings.push(text);
                 }
-            }
+            });
 
-            // Get all links with their text
+            // Extract paragraphs and article content
+            document.querySelectorAll('p, article, .article, .content').forEach(element => {
+                const text = element.textContent.trim();
+                if (text && text.length > 20) { // Avoid tiny snippets
+                    content.paragraphs.push(text);
+                }
+            });
+
+            // Extract links with context
             document.querySelectorAll('a').forEach(link => {
                 const text = link.textContent.trim();
                 const href = link.href;
-                if (text && href) {
-                    content.links.add(`${text} (${href})`);
-                }
-            });
-
-            // Get main content areas
-            ['article', 'main', '[role="main"]', '.content', '.main'].forEach(selector => {
-                document.querySelectorAll(selector).forEach(el => {
-                    content.mainContent += el.textContent.trim() + '\\n';
-                });
-            });
-
-            // Get individual articles or content blocks
-            document.querySelectorAll('article, .article, .post, .content-block').forEach(article => {
-                const title = article.querySelector('h1, h2, h3')?.textContent.trim() || '';
-                const text = article.textContent.trim();
-                if (text) {
-                    content.articles.push({ title, text });
+                const parentText = link.parentElement?.textContent.trim();
+                if (text && href && parentText && parentText.length > text.length) {
+                    content.links.push({
+                        text: text,
+                        context: parentText
+                    });
                 }
             });
 
@@ -98,23 +67,18 @@ module.exports = async (req, res) => {
 
         const content = extractContent();
 
-        // Combine all content
-        const combinedContent = `
-            Main Content:
-            ${content.mainContent}
+        // Format content for GPT, ensuring we don't exceed token limits
+        const formattedContent = `
+Page Title: ${content.title}
 
-            Articles:
-            ${content.articles.map(a => `${a.title}\n${a.text}`).join('\n\n')}
+Key Headlines:
+${content.headings.slice(0, 10).join('\n')}
 
-            Additional Content:
-            ${content.relevantText.join('\n')}
+Main Content:
+${content.paragraphs.slice(0, 15).map(p => `• ${p}`).join('\n\n')}
 
-            Links:
-            ${Array.from(content.links).join('\n')}
-
-            API Content:
-            ${additionalContent}
-        `;
+Relevant Links and Context:
+${content.links.slice(0, 10).map(link => `• ${link.text}: ${link.context}`).join('\n')}`;
 
         // Initialize OpenAI
         const openai = new OpenAI({
@@ -126,11 +90,11 @@ module.exports = async (req, res) => {
             messages: [
                 { 
                     role: "system", 
-                    content: "You are a web content analyzer. Extract and analyze ALL relevant information from the provided content. Be thorough and specific."
+                    content: "You are a web content analyzer. Extract and analyze ALL relevant information from the provided content. Focus specifically on the user's task. Be thorough but concise."
                 },
                 { 
                     role: "user", 
-                    content: `Task: ${task}\n\nContent:\n${combinedContent.slice(0, 4000)}`
+                    content: `Task: ${task}\n\nWebpage Content:\n${formattedContent}`
                 }
             ],
             max_tokens: 1000
@@ -141,9 +105,9 @@ module.exports = async (req, res) => {
             data: {
                 analysis: completion.choices[0].message.content,
                 metadata: {
-                    articlesFound: content.articles.length,
-                    contentLength: combinedContent.length,
-                    linksFound: content.links.size
+                    headingsCount: content.headings.length,
+                    paragraphsCount: content.paragraphs.length,
+                    linksCount: content.links.length
                 }
             }
         });
