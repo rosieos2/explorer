@@ -8,13 +8,16 @@ async function connectToDatabase() {
     }
     
     try {
-        const client = await MongoClient.connect(process.env.MONGODB_URI, {
-            serverApi: {
-                version: '1',
-                strict: true,
-                deprecationErrors: true
-            }
-        });
+        const options = {
+            useUnifiedTopology: true,
+            directConnection: true
+        };
+
+        const client = await MongoClient.connect(process.env.MONGODB_URI, options);
+        
+        // Send a ping to confirm a successful connection
+        await client.db("admin").command({ ping: 1 });
+        console.log("Pinged your deployment. You successfully connected to MongoDB!");
         
         const db = client.db("webagent");
         cachedDb = db;
@@ -41,25 +44,29 @@ export default async function handler(req, res) {
 
         if (req.method === 'POST') {
             const { prompt } = req.body;
-            await collection.insertOne({
+            const result = await collection.insertOne({
                 prompt,
                 timestamp: new Date(),
                 ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress
             });
-            res.status(200).json({ success: true });
+            res.status(200).json({ success: true, id: result.insertedId });
         } 
         else if (req.method === 'GET') {
             const prompts = await collection.find({})
                 .sort({ timestamp: -1 })
                 .limit(20)
                 .toArray();
-            res.status(200).json({ prompts }); // Return wrapped in object
+            res.status(200).json({ prompts });
         }
         else {
             res.status(405).json({ error: 'Method not allowed' });
         }
     } catch (error) {
         console.error('Request handling error:', error);
-        res.status(500).json({ error: 'Database error', message: error.message });
+        res.status(500).json({ 
+            error: 'Database error', 
+            message: error.message,
+            prompts: [] 
+        });
     }
 }
