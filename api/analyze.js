@@ -126,14 +126,14 @@ module.exports = async (req, res) => {
             ]
         });
 
-        console.log('Sending successful response');
-        return res.status(200).json({
-            success: true,
-            data: {
-                analysis: completion.choices[0].message.content,
-                screenshots: screenshots
-            }
-        });
+        console.log('Sending successful response with screenshots:', screenshots.length);
+return res.status(200).json({
+    success: true,
+    data: {
+        analysis: completion.choices[0].message.content,
+        screenshots: screenshots  // Make sure this is populated
+    }
+});
 
     } catch (error) {
         console.error('Detailed API Error:', {
