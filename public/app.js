@@ -36,9 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(data.error || 'Failed to process request');
             }
 
-            // Display screenshot first if available
-            if (data.data.screenshot) {
-                displayScreenshot(data.data.screenshot);
+            // Display screenshots if available
+            if (data.data.screenshots && data.data.screenshots.length > 0) {
+                displayScreenshots(data.data.screenshots);
             }
 
             // Process and display the analysis results
@@ -54,80 +54,39 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function displayResults(data) {
-        // Convert the analysis text into structured sections
         const analysis = data.analysis;
-        
-        // Parse the analysis text to find common patterns like lists, key findings, etc.
         const sections = parseAnalysis(analysis);
 
         resultDiv.innerHTML = `
-            <h2>Analysis Results</h2>
-            
             <div class="section">
-                <div class="section-title">Key Findings</div>
-                <div class="metrics-grid">
-                    ${sections.metrics.map(metric => `
-                        <div class="metric-card">
-                            <div class="metric-value">${metric.value}</div>
-                            <div class="metric-label">${metric.label}</div>
-                        </div>
-                    `).join('')}
-                </div>
+                <div class="section-title">Analysis Results</div>
+                ${formatSectionContent(sections.content)}
             </div>
-
-            ${sections.details.map(section => `
-                <div class="section">
-                    <div class="section-title">${section.title}</div>
-                    ${formatSectionContent(section.content)}
-                </div>
-            `).join('')}
         `;
     }
 
     function parseAnalysis(analysisText) {
-        // Initialize sections structure
-        const sections = {
-            metrics: [
-                {
-                    value: 'Found',
-                    label: 'Analysis'
-                },
-                {
-                    value: 'Results',
-                    label: 'Generated'
-                }
-            ],
-            details: []
-        };
-
-        // Clean up the text by removing asterisks and fixing line breaks
+        // Clean up the text
         const cleanText = analysisText
             .split('\n')
             .map(line => line.trim())
             .filter(line => line.length > 0);
 
-        // Split by numbered points
+        // Split by numbered points if they exist, otherwise keep as is
         const formattedText = cleanText
             .join('\n')
             .split(/(?=\d+\.\s+)/g)
             .map(text => text.trim())
             .filter(text => text.length > 0);
 
-        // Create sections from the cleaned text
-        sections.details = [
-            {
-                title: 'Results',
-                content: formattedText
-            }
-        ];
-
-        return sections;
+        return {
+            content: formattedText
+        };
     }
 
     function formatSectionContent(content) {
         if (Array.isArray(content)) {
             return content.map(item => {
-                // Check if item starts with a number followed by a period
                 const isNumberedPoint = /^\d+\.\s/.test(item);
                 const formattedItem = isNumberedPoint ? item : `• ${item}`;
                 return `<div class="data-item">
@@ -138,18 +97,22 @@ document.addEventListener('DOMContentLoaded', () => {
         return `<p>${content}</p>`;
     }
 
-    function displayScreenshot(screenshot) {
+    function displayScreenshots(screenshots) {
         screenshotsDiv.innerHTML = `
             <div class="section">
-                <div class="section-title">Visual Analysis</div>
-                <div class="screenshot-container">
-                    <div class="screenshot">
-                        <img src="data:image/png;base64,${screenshot}" 
-                             alt="Page Analysis Screenshot">
-                    </div>
-                    <div class="screenshot-caption">
-                        Screenshot of analyzed content
-                    </div>
+                <div class="section-title">Relevant Content</div>
+                <div class="screenshots-grid">
+                    ${screenshots.map(shot => `
+                        <div class="screenshot-container">
+                            <div class="screenshot">
+                                <img src="data:image/png;base64,${shot.image}" 
+                                     alt="Relevant content section">
+                            </div>
+                            <div class="screenshot-caption">
+                                Found in ${shot.selector}
+                            </div>
+                        </div>
+                    `).join('')}
                 </div>
             </div>
         `;
