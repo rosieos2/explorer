@@ -36,13 +36,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(data.error || 'Failed to process request');
             }
 
-            // Process and display the analysis results
-            displayResults(data.data);
-
-            // Display screenshot if available
+            // Display screenshot first if available
             if (data.data.screenshot) {
                 displayScreenshot(data.data.screenshot);
             }
+
+            // Process and display the analysis results
+            displayResults(data.data);
 
         } catch (error) {
             errorDiv.textContent = `Error: ${error.message}`;
@@ -89,16 +89,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const sections = {
             metrics: [
                 {
-                    value: 'Live',
-                    label: 'Updates'
+                    value: 'Found',
+                    label: 'Analysis'
                 },
                 {
-                    value: '24/7',
-                    label: 'Coverage'
-                },
-                {
-                    value: 'Now',
-                    label: 'Transfer Window'
+                    value: 'Results',
+                    label: 'Generated'
                 }
             ],
             details: []
@@ -106,16 +102,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Clean up the text by removing asterisks and fixing line breaks
         const cleanText = analysisText
-            .replace(/\*/g, '')  // Remove asterisks
-            .replace(/\s*\n\s*([a-z])/g, ' $1')  // Join broken sentences
-            .split(/\d+\.\s+/)   // Split by numbered points
-            .filter(text => text.trim());  // Remove empty items
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0);
+
+        // Split by numbered points
+        const formattedText = cleanText
+            .join('\n')
+            .split(/(?=\d+\.\s+)/g)
+            .map(text => text.trim())
+            .filter(text => text.length > 0);
 
         // Create sections from the cleaned text
         sections.details = [
             {
-                title: 'Latest Transfer News',
-                content: cleanText.map(text => text.trim())
+                title: 'Results',
+                content: formattedText
             }
         ];
 
@@ -125,18 +127,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function formatSectionContent(content) {
         if (Array.isArray(content)) {
             return content.map(item => {
-                if (item.includes('•') || item.includes('-')) {
-                    // Convert bullet points to structured list
-                    const listItems = item.split(/[•-]/).filter(i => i.trim());
-                    return `
-                        <ul>
-                            ${listItems.map(li => `
-                                <li>${li.trim()}</li>
-                            `).join('')}
-                        </ul>
-                    `;
-                }
-                return `<p>${item}</p>`;
+                // Check if item starts with a number followed by a period
+                const isNumberedPoint = /^\d+\.\s/.test(item);
+                const formattedItem = isNumberedPoint ? item : `• ${item}`;
+                return `<div class="data-item">
+                    <span class="data-value">${formattedItem}</span>
+                </div>`;
             }).join('');
         }
         return `<p>${content}</p>`;
@@ -144,9 +140,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function displayScreenshot(screenshot) {
         screenshotsDiv.innerHTML = `
-            <div class="screenshot">
-                <img src="data:image/png;base64,${screenshot}" 
-                     alt="Page Screenshot">
+            <div class="section">
+                <div class="section-title">Visual Analysis</div>
+                <div class="screenshot-container">
+                    <div class="screenshot">
+                        <img src="data:image/png;base64,${screenshot}" 
+                             alt="Page Analysis Screenshot">
+                    </div>
+                    <div class="screenshot-caption">
+                        Screenshot of analyzed content
+                    </div>
+                </div>
             </div>
         `;
     }
