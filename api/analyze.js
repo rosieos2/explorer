@@ -54,13 +54,7 @@ async function findRelevantSources(query) {
             messages: [
                 {
                     role: "system",
-                    content: "You are a search optimization expert. Your task is to:" +
-                            "1. Analyze the user's query and identify key topics/entities" +
-                            "2. Add relevant context and specific terms to improve search accuracy" +
-                            "3. Include time-based terms for recent information if appropriate" +
-                            "4. Format the query to maximize relevance in web searches" +
-                            "5. Remove any special characters that might interfere with search" +
-                            "Return only the optimized search query, no explanations."
+                    content: "You are a search optimization expert. Format the query to maximize relevance in web searches. Return only the optimized query, no explanations."
                 },
                 {
                     role: "user",
@@ -71,98 +65,54 @@ async function findRelevantSources(query) {
         });
 
         const searchQuery = searchCompletion.choices[0].message.content;
-        
-        // Define different search parameters for multiple attempts
-        const searchParams = [
-            { freshness: 'Day', count: 10 },
-            { freshness: 'Week', count: 10 },
-            { freshness: 'Month', count: 10 },
-            { count: 10 } // No freshness parameter as fallback
-        ];
-
         const urls = new Set();
         
-        // Try each search parameter set sequentially until we get results
-        for (const params of searchParams) {
-            const searchUrl = new URL(SEARCH_ENDPOINT);
-            searchUrl.searchParams.set('q', searchQuery);
-            searchUrl.searchParams.set('count', params.count.toString());
-            searchUrl.searchParams.set('responseFilter', 'Webpages');
-            if (params.freshness) {
-                searchUrl.searchParams.set('freshness', params.freshness);
-            }
+        // Simple search with retry
+        for (let retryCount = 0; retryCount <= RETRY_DELAYS.length; retryCount++) {
+            try {
+                if (retryCount > 0) {
+                    console.log(`Retry attempt ${retryCount}`);
+                    await delay(RETRY_DELAYS[retryCount - 1]);
+                }
 
-            // Add retry logic for each search attempt
-            let lastError = null;
-            for (let retryCount = 0; retryCount <= RETRY_DELAYS.length; retryCount++) {
-                try {
-                    // Add delay between requests to respect rate limits
-                    if (retryCount > 0) {
-                        const delayTime = RETRY_DELAYS[retryCount - 1];
-                        console.log(`Retrying search after ${delayTime}ms delay...`);
-                        await delay(delayTime);
+                const response = await fetch(`${SEARCH_ENDPOINT}?q=${encodeURIComponent(searchQuery)}&count=50`, {
+                    headers: {
+                        'Ocp-Apim-Subscription-Key': SEARCH_API_KEY
                     }
+                });
 
-                    const response = await fetch(searchUrl.toString(), {
-                        headers: {
-                            'Ocp-Apim-Subscription-Key': SEARCH_API_KEY
+                if (response.status === 429) {
+                    console.log('Rate limit hit, will retry...');
+                    continue;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`Search failed: ${response.status}`);
+                }
+
+                const result = await response.json();
+                
+                if (result?.webPages?.value) {
+                    result.webPages.value.forEach(page => {
+                        try {
+                            const url = new URL(page.url);
+                            if (url.protocol === 'https:' || url.protocol === 'http:') {
+                                urls.add(page.url);
+                            }
+                        } catch {
+                            // Invalid URL, skip
                         }
                     });
-
-                    if (response.status === 429) {
-                        console.log('Rate limit hit, will retry...');
-                        lastError = new Error('Rate limit exceeded');
-                        continue;
-                    }
-
-                    if (!response.ok) {
-                        console.log(`Search failed with params ${JSON.stringify(params)}: ${response.status}`);
-                        lastError = new Error(`HTTP ${response.status}`);
-                        continue;
-                    }
-
-                    // If we get here, the request was successful
-                    lastError = null;
-                    const result = await response.json();
-                    
-                    if (result?.webPages?.value) {
-                        result.webPages.value.forEach(page => {
-                            try {
-                                const url = new URL(page.url);
-                                if (url.protocol === 'https:' || url.protocol === 'http:') {
-                                    urls.add(page.url);
-                                }
-                            } catch {
-                                // Invalid URL, skip
-                            }
-                        });
-                    }
-
-                    // If we found URLs, break out of the retry loop
-                    if (urls.size > 0) {
-                        break;
-                    }
-
-                    // Add delay before next search parameter set
-                    await delay(RATE_LIMIT_DELAY);
-                    break; // Break retry loop on success
-
-                } catch (error) {
-                    console.log(`Search attempt failed with params ${JSON.stringify(params)}:`, error);
-                    lastError = error;
-                    // Continue to next retry
                 }
-            }
 
-            // If we found URLs, break out of the params loop
-            if (urls.size > 0) {
-                break;
-            }
-
-            // If all retries failed, continue to next params set
-            if (lastError) {
-                console.log(`All retries failed for params ${JSON.stringify(params)}, trying next parameter set...`);
-                continue;
+                if (urls.size > 0) {
+                    return Array.from(urls);
+                }
+            } catch (error) {
+                console.log(`Search attempt ${retryCount} failed:`, error);
+                if (retryCount === RETRY_DELAYS.length) {
+                    throw error;
+                }
             }
         }
         
