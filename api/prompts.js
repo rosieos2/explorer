@@ -1,4 +1,3 @@
-// api/prompts.js
 import { MongoClient } from 'mongodb';
 
 let cachedDb = null;
@@ -7,10 +6,24 @@ async function connectToDatabase() {
     if (cachedDb) {
         return cachedDb;
     }
-    const client = await MongoClient.connect(process.env.MONGODB_URI);
-    const db = client.db("webagent");
-    cachedDb = db;
-    return db;
+    
+    try {
+        const client = await MongoClient.connect(process.env.MONGODB_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            ssl: true,
+            tls: true,
+            tlsAllowInvalidCertificates: false,
+            retryWrites: true
+        });
+        
+        const db = client.db("webagent");
+        cachedDb = db;
+        return db;
+    } catch (error) {
+        console.error('MongoDB connection error:', error);
+        throw error;
+    }
 }
 
 export default async function handler(req, res) {
@@ -19,11 +32,11 @@ export default async function handler(req, res) {
         return;
     }
 
-    const db = await connectToDatabase();
-    const collection = db.collection("prompts");
+    try {
+        const db = await connectToDatabase();
+        const collection = db.collection("prompts");
 
-    if (req.method === 'POST') {
-        try {
+        if (req.method === 'POST') {
             const { prompt } = req.body;
             await collection.insertOne({
                 prompt,
@@ -31,22 +44,19 @@ export default async function handler(req, res) {
                 ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress
             });
             res.status(200).json({ success: true });
-        } catch (error) {
-            res.status(500).json({ error: 'Error saving prompt' });
-        }
-    } 
-    else if (req.method === 'GET') {
-        try {
+        } 
+        else if (req.method === 'GET') {
             const prompts = await collection.find({})
                 .sort({ timestamp: -1 })
                 .limit(20)
                 .toArray();
             res.status(200).json(prompts);
-        } catch (error) {
-            res.status(500).json({ error: 'Error fetching prompts' });
         }
-    }
-    else {
-        res.status(405).json({ error: 'Method not allowed' });
+        else {
+            res.status(405).json({ error: 'Method not allowed' });
+        }
+    } catch (error) {
+        console.error('Request handling error:', error);
+        res.status(500).json({ error: 'Database error', message: error.message });
     }
 }
