@@ -47,6 +47,7 @@
     display: flex;
     flex-direction: column;
     gap: 30px;
+    padding-left: 40px;
 }
 
 .phase {
@@ -118,12 +119,14 @@
             text-decoration: none;
         }
         
-        .real-world-environment {
-    border: 2px dashed #CBD5E0;
-    padding: 30px;
-    margin-top: 40px;
-    border-radius: 16px;
-    position: relative;
+        .real-world-environment::after {
+    content: 'Real World Self-Exploration';
+    position: absolute;
+    bottom: -10px;
+    right: 20px;
+    background: var(--background-color);
+    padding: 0 10px;
+    font-weight: 500;
 }
 
 .process-steps {
@@ -160,6 +163,13 @@
     font-size: 24px;
     color: #4A5568;
     font-weight: bold;
+}
+
+.phase-content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;  /* Align items to left */
+    gap: 8px;
 }
 
         .nav-links {
@@ -474,11 +484,12 @@
         .process-step {
             display: inline-block;
             background: #EDF2F7;
-            padding: 8px 16px;
-            border-radius: 4px;
+            padding: 12px 24px;
+            border-radius: 8px;
             margin-right: 8px;
             font-size: 0.9rem;
             color: var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
         .screenshot-section {
@@ -505,6 +516,7 @@
             border-radius: 8px;
             font-family: monospace;
             font-size: 0.9rem;
+            line-height: 2;
             line-height: 1.6;
         }
 
