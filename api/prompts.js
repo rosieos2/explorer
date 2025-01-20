@@ -7,15 +7,17 @@ async function connectToDatabase() {
         return cachedDb;
     }
     
-    try {
-        const client = await MongoClient.connect(process.env.MONGODB_URI);
-        const db = client.db("webagent");
-        cachedDb = db;
-        return db;
-    } catch (error) {
-        console.error('MongoDB connection error:', error);
-        throw error;
-    }
+    const client = await MongoClient.connect(process.env.MONGODB_URI, {
+        serverApi: {
+            version: '1',
+            strict: true,
+            deprecationErrors: true
+        }
+    });
+        
+    const db = client.db("webagent");
+    cachedDb = db;
+    return db;
 }
 
 export default async function handler(req, res) {
@@ -46,13 +48,13 @@ export default async function handler(req, res) {
                 .sort({ timestamp: -1 })
                 .limit(20)
                 .toArray();
-            res.status(200).json(prompts);
+            res.status(200).json({ prompts }); // Wrap in an object
         }
         else {
             res.status(405).json({ error: 'Method not allowed' });
         }
     } catch (error) {
         console.error('Request handling error:', error);
-        res.status(500).json({ error: 'Database error', message: error.message });
+        res.status(500).json({ error: 'Database error', message: error.message, prompts: [] }); // Include empty prompts array
     }
 }
