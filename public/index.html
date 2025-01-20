@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Agent</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
         :root {
             --primary-color: #2D3748;
@@ -23,12 +24,59 @@
             line-height: 1.6;
             background: var(--background-color);
             color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
+        /* Navbar Styles */
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-color);
+        }
+
+        /* Main Content Styles */
         .container {
             max-width: 1200px;
             margin: 40px auto;
             padding: 0 20px;
+            flex: 1;
         }
 
         .hero {
@@ -51,6 +99,7 @@
             margin: 0 auto;
         }
 
+        /* Form Styles */
         .form-container {
             background: white;
             padding: 40px;
@@ -63,35 +112,6 @@
         .form-group {
             margin-bottom: 24px;
         }
-
-        .screenshots-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 24px;
-    margin-top: 20px;
-}
-
-.sources-section {
-    margin-bottom: 24px;
-}
-
-.sources-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.source-item {
-    background: #EDF2F7;
-    padding: 8px 16px;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    color: #4A5568;
-}
-
-.source-url {
-    word-break: break-all;
-}
 
         label {
             display: block;
@@ -143,6 +163,7 @@
             transform: translateY(1px);
         }
 
+        /* Loading and Error States */
         .loading {
             text-align: center;
             padding: 20px;
@@ -184,6 +205,7 @@
             display: block;
         }
 
+        /* Results Styling */
         #result {
             margin-top: 30px;
             padding: 24px;
@@ -208,157 +230,11 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
 
-        #result .section-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: var(--primary-color);
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        #result .section-title::before {
-            content: '';
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            background: var(--accent-color);
-            border-radius: 50%;
-        }
-
-        #result .data-item {
-            padding: 8px 0;
-            border-bottom: 1px solid #E2E8F0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .screenshot-container {
-    margin-top: 20px;
-}
-
-.screenshot {
-    width: 100%;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    background: white;
-    padding: 16px;
-}
-
-.screenshot img {
-    width: 100%;
-    height: auto;
-    border-radius: 8px;
-    display: block;
-}
-
-.screenshot-caption {
-    text-align: center;
-    color: #4A5568;
-    margin-top: 12px;
-    font-size: 0.9rem;
-}
-
-.section-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin-bottom: 20px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid var(--accent-color);
-}
-
-        #result .data-item:last-child {
-            border-bottom: none;
-        }
-
-        #result .data-label {
-            color: #4A5568;
-            font-weight: 500;
-        }
-
-        #result .data-value {
-            color: var(--text-color);
-            font-weight: 600;
-        }
-
-        #result .metrics-grid {
+        .screenshots-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-top: 16px;
-        }
-
-        #result .metric-card {
-            background: #F7FAFC;
-            padding: 16px;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        #result .metric-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--accent-color);
-            margin-bottom: 4px;
-        }
-
-        #result .metric-label {
-            color: #4A5568;
-            font-size: 0.9rem;
-        }
-
-        #result code {
-            background: #2D3748;
-            color: #EDF2F7;
-            padding: 16px;
-            border-radius: 6px;
-            display: block;
-            overflow-x: auto;
-            margin: 12px 0;
-        }
-
-        #result ul, #result ol {
-            margin: 12px 0;
-            padding-left: 24px;
-        }
-
-        #result li {
-            margin: 6px 0;
-        }
-
-        #result .status-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        #result .status-success {
-            background: #C6F6D5;
-            color: #2F855A;
-        }
-
-        #result .status-warning {
-            background: #FEEBC8;
-            color: #C05621;
-        }
-
-        #result .status-error {
-            background: #FED7D7;
-            color: #C53030;
-        }
-
-        .screenshots {
-            margin-top: 30px;
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 24px;
+            margin-top: 20px;
         }
 
         .screenshot {
@@ -378,24 +254,116 @@
             height: auto;
             display: block;
         }
+
+        /* 3D Character Window */
+        .character-window {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 200px;
+            height: 200px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+            z-index: 100;
+        }
+
+        #character-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background: white;
+            padding: 3rem 0;
+            margin-top: auto;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.05);
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-links a {
+            color: #4A5568;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-color);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid #E2E8F0;
+            color: #4A5568;
+        }
     </style>
 </head>
 <body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="nav-logo">Web Agent</a>
+            <div class="nav-links">
+                <a href="#">Home</a>
+                <a href="#">Features</a>
+                <a href="#">Documentation</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 3D Character Window -->
+    <div class="character-window">
+        <canvas id="character-canvas"></canvas>
+    </div>
+
+    <!-- Main Content -->
     <div class="container">
-    <div class="hero">
-    <h1>Web Agent</h1>
-    <p>Ask our web agent anything, and it will search and analyze the web for you.</p>
-</div>
+        <div class="hero">
+            <h1>Web Agent</h1>
+            <p>Automate your web tasks with our powerful agent. Just enter a URL and describe what you need.</p>
+        </div>
         
         <div class="form-container">
-        <form id="agentForm">
-        <div class="form-group">
-            <label for="task">What would you like to find?</label>
-            <textarea id="task" required 
-                      placeholder="Ask anything (e.g., 'find good Muay Thai gyms in London' or 'search for best Italian restaurants in New York')"></textarea>
-        </div>
-        <button type="submit" id="submitBtn">Search Web</button>
-    </form>
+            <form id="agentForm">
+                <div class="form-group">
+                    <label for="url">Website URL</label>
+                    <input type="url" id="url" required 
+                           placeholder="https://example.com">
+                </div>
+                <div class="form-group">
+                    <label for="task">Task Description</label>
+                    <textarea id="task" required 
+                              placeholder="Describe what you want the agent to do (e.g., 'collect news headlines' or 'take screenshots of product images')"></textarea>
+                </div>
+                <button type="submit" id="submitBtn">Run Agent</button>
+            </form>
             
             <div class="loading" id="loading">
                 Processing your request...
@@ -409,6 +377,66 @@
         </div>
     </div>
 
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>About</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Our Story</a></li>
+                    <li><a href="#">Team</a></li>
+                    <li><a href="#">Careers</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Resources</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Documentation</a></li>
+                    <li><a href="#">API Reference</a></li>
+                    <li><a href="#">Tutorials</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Support</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">Status</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 Web Agent. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Three.js setup for 3D character
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        const canvas = document.getElementById('character-canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
+        renderer.setSize(200, 200);
+
+        // Create a simple cube as placeholder (you can replace with more complex 3D model)
+        const geometry = new THREE.BoxGeometry();
+        const material = new THREE.MeshBasicMaterial({ color: 0x4299E1 });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+
+        camera.position.z = 5;
+
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+        animate();
+    </script>
+    
+    <!-- Connect to your app.js file -->
     <script src="app.js"></script>
 </body>
 </html>
