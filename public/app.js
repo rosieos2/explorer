@@ -1,25 +1,23 @@
-// app.js
 document.addEventListener('DOMContentLoaded', () => {
-    const form = document.getElementById('agentForm');
+    const searchForm = document.getElementById('searchForm');
     const loadingDiv = document.getElementById('loading');
     const errorDiv = document.getElementById('error');
-    const submitBtn = document.getElementById('submitBtn');
-    const resultDiv = document.getElementById('result');
-    const screenshotsDiv = document.getElementById('screenshots');
+    const resultsDiv = document.getElementById('results');
+    const searchInput = document.getElementById('searchInput');
 
-    form.addEventListener('submit', async (e) => {
+    searchForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Get form values
-        const url = document.getElementById('url').value;
-        const task = document.getElementById('task').value;
+        const query = searchInput.value.trim();
+        
+        if (!query) return;
 
-        // Reset and show loading state
+        // Reset UI state
         loadingDiv.classList.add('active');
-        submitBtn.disabled = true;
         errorDiv.classList.remove('active');
-        screenshotsDiv.innerHTML = '';
-        resultDiv.innerHTML = '';
+        errorDiv.textContent = '';
+        resultsDiv.innerHTML = '';
+        searchInput.disabled = true;
 
         try {
             const response = await fetch('/api/analyze', {
@@ -27,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ url, task })
+                body: JSON.stringify({ task: query })
             });
 
             const data = await response.json();
@@ -36,12 +34,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(data.error || 'Failed to process request');
             }
 
-            // Display screenshots if available
-            if (data.data.screenshots && data.data.screenshots.length > 0) {
-                displayScreenshots(data.data.screenshots);
-            }
-
-            // Process and display the analysis results
             displayResults(data.data);
 
         } catch (error) {
@@ -49,90 +41,73 @@ document.addEventListener('DOMContentLoaded', () => {
             errorDiv.classList.add('active');
         } finally {
             loadingDiv.classList.remove('active');
-            submitBtn.disabled = false;
+            searchInput.disabled = false;
         }
     });
 
     function displayResults(data) {
-        // Display sources if available
-        let sourcesHtml = '';
+        // Create sources card if sources exist
         if (data.sources && data.sources.length > 0) {
-            sourcesHtml = `
-                <div class="section sources-section">
-                    <div class="section-title">Sources Analyzed</div>
-                    <div class="sources-list">
-                        ${data.sources.map(source => `
-                            <div class="source-item">
-                                <span class="source-url">${source}</span>
-                            </div>
-                        `).join('')}
-                    </div>
+            const sourcesCard = createCard('Sources', `
+                <div class="sources-list">
+                    ${data.sources.map(source => `
+                        <a href="${source}" 
+                           target="_blank" 
+                           rel="noopener noreferrer" 
+                           class="source-link">
+                            ${new URL(source).hostname}
+                        </a>
+                    `).join('')}
                 </div>
-            `;
+            `);
+            resultsDiv.appendChild(sourcesCard);
         }
-    
-        const analysis = data.analysis;
-        const sections = parseAnalysis(analysis);
-    
-        resultDiv.innerHTML = `
-            ${sourcesHtml}
-            <div class="section">
-                <div class="section-title">Analysis Results</div>
-                ${formatSectionContent(sections.content)}
-            </div>
-        `;
-    }
 
-    function parseAnalysis(analysisText) {
-        // Clean up the text
-        const cleanText = analysisText
-            .split('\n')
-            .map(line => line.trim())
-            .filter(line => line.length > 0);
+        // Create analysis card
+        const analysisCard = createCard('Results', `
+            <div class="analysis-content">${formatAnalysis(data.analysis)}</div>
+        `);
+        resultsDiv.appendChild(analysisCard);
 
-        // Split by numbered points if they exist, otherwise keep as is
-        const formattedText = cleanText
-            .join('\n')
-            .split(/(?=\d+\.\s+)/g)
-            .map(text => text.trim())
-            .filter(text => text.length > 0);
-
-        return {
-            content: formattedText
-        };
-    }
-
-    function formatSectionContent(content) {
-        if (Array.isArray(content)) {
-            return content.map(item => {
-                const isNumberedPoint = /^\d+\.\s/.test(item);
-                const formattedItem = isNumberedPoint ? item : `• ${item}`;
-                return `<div class="data-item">
-                    <span class="data-value">${formattedItem}</span>
-                </div>`;
-            }).join('');
-        }
-        return `<p>${content}</p>`;
-    }
-
-    function displayScreenshots(screenshots) {
-        screenshotsDiv.innerHTML = `
-            <div class="section">
-                <div class="section-title">Relevant Content</div>
+        // Create screenshots card if screenshots exist
+        if (data.screenshots && data.screenshots.length > 0) {
+            const screenshotsCard = createCard('Visual Results', `
                 <div class="screenshots-grid">
-                    ${screenshots.map(shot => `
+                    ${data.screenshots.map(screenshot => `
                         <div class="screenshot-container">
-                            <div class="screenshot">
-                                <img src="data:image/png;base64,${shot.image}" 
-                                     alt="Relevant content section">
-                            </div>
+                            <img src="data:image/png;base64,${screenshot.image}" 
+                                 alt="Screenshot from ${screenshot.source}">
                             <div class="screenshot-caption">
-                                Source: ${shot.source || 'Unknown'}
+                                ${new URL(screenshot.source).hostname}
                             </div>
                         </div>
                     `).join('')}
                 </div>
+            `);
+            resultsDiv.appendChild(screenshotsCard);
+        }
+    }
+
+    function createCard(title, content) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            <div class="card-header">
+                <h2 class="card-title">${title}</h2>
+            </div>
+            <div class="card-content">
+                ${content}
             </div>
         `;
+        return card;
+    }
+
+    function formatAnalysis(analysis) {
+        // Split by numbered points and preserve formatting
+        return analysis
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0)
+            .join('\n\n');
     }
 });
