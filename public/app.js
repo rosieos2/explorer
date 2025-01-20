@@ -54,9 +54,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function displayResults(data) {
+        // Debug log to see what data we're receiving
+        console.log('Received data:', data);
+    
+        // Display screenshots if they exist
+        if (data.screenshots && data.screenshots.length > 0) {
+            console.log('Found screenshots:', data.screenshots.length);
+            displayScreenshots(data.screenshots);
+        } else {
+            console.log('No screenshots found in data');
+        }
+    
         const analysis = data.analysis;
         const sections = parseAnalysis(analysis);
-
+    
         resultDiv.innerHTML = `
             <div class="section">
                 <div class="section-title">Analysis Results</div>
