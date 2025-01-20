@@ -267,7 +267,7 @@ async function handler(req, res) {
         console.log('Found relevant URLs:', relevantUrls);
 
         const analysisPromises = relevantUrls.map(url => analyzeSite(url, task));
-        const sitesData = (await Promise.all(analysisPromises)).filter(Boolean);
+        let sitesData = (await Promise.all(analysisPromises)).filter(Boolean);
 
         if (sitesData.length === 0) {
             console.log('No sites analyzed successfully, retrying with modified query...');
