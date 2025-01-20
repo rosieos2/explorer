@@ -53,7 +53,7 @@ async function findRelevantSources(query) {
             messages: [
                 {
                     role: "system",
-                    content: "Convert user queries into optimal search terms. Focus on relevance and recency. Add relevant terms based on context (e.g., 'news' for current events, 'review' for products, 'guide' for how-to queries). Return only the search query, no explanation."
+                    content: "Convert user queries into optimal search terms that will find the most relevant and recent information. Think like a human performing a web search. Return only the optimized search query."
                 },
                 {
                     role: "user",
@@ -65,8 +65,8 @@ async function findRelevantSources(query) {
 
         const searchQuery = searchCompletion.choices[0].message.content;
         
-        // Perform web search
-        const searchResponse = await fetch(`${SEARCH_ENDPOINT}?q=${encodeURIComponent(searchQuery)}&count=5&responseFilter=Webpages`, {
+        // Perform web search with Bing API
+        const searchResponse = await fetch(`${SEARCH_ENDPOINT}?q=${encodeURIComponent(searchQuery)}&count=10&responseFilter=Webpages`, {
             headers: {
                 'Ocp-Apim-Subscription-Key': SEARCH_API_KEY
             }
@@ -78,35 +78,25 @@ async function findRelevantSources(query) {
 
         const searchResults = await searchResponse.json();
         
-        // Validate search results structure
-        if (!searchResults || !searchResults.webPages || !Array.isArray(searchResults.webPages.value)) {
-            console.log('Invalid search results structure, using fallback sources');
-            return getFallbackSources(query);
+        // Just return valid URLs from the search results
+        if (searchResults?.webPages?.value) {
+            return searchResults.webPages.value
+                .map(result => result.url)
+                .filter(url => {
+                    try {
+                        const urlObj = new URL(url);
+                        return urlObj.protocol === 'https:' || urlObj.protocol === 'http:';
+                    } catch {
+                        return false;
+                    }
+                });
         }
         
-        // Extract and validate URLs
-        const urls = searchResults.webPages.value
-            .map(result => result.url)
-            .filter(url => {
-                try {
-                    const urlObj = new URL(url);
-                    return urlObj.protocol === 'https:' || urlObj.protocol === 'http:';
-                } catch {
-                    return false;
-                }
-            });
-
-        // If no valid URLs found, use fallback
-        if (urls.length === 0) {
-            console.log('No valid URLs found, using fallback sources');
-            return getFallbackSources(query);
-        }
-
-        return urls;
+        return [];
 
     } catch (error) {
         console.error('Search error:', error);
-        return getFallbackSources(query);
+        return [];
     }
 }
 
