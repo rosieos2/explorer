@@ -8,26 +8,32 @@ const SEARCH_ENDPOINT = 'https://api.bing.microsoft.com/v7.0/search';
 const FETCH_TIMEOUT = 15000;
 const SCREENSHOT_TIMEOUT = 20000;
 
-async function getScreenshots(url, retries = 2) {
+async function getScreenshots(url, task) {
     try {
         console.log('Getting screenshot for:', url);
         await new Promise(resolve => setTimeout(resolve, 1000));
-        const screenshotUrl = `https://api.apiflash.com/v1/urltoimage?access_key=${process.env.APIFLASH_KEY}&url=${encodeURIComponent(url)}&width=600&height=400&fresh=true&format=jpeg&quality=60&response_type=json&full_page=false&delay=2`;
         
-        const screenshotResponse = await fetch(screenshotUrl, {
-            timeout: SCREENSHOT_TIMEOUT
-        });
-        
-        if (screenshotResponse.ok) {
-            const data = await screenshotResponse.json();
-            const imageResponse = await fetch(data.url, {
-                timeout: FETCH_TIMEOUT
+        // Only take screenshots of pages that are likely to have valuable visual content
+        if (url.includes('video') || url.includes('gallery') || url.includes('image') || 
+            url.includes('photo') || url.includes('watch') || url.includes('highlights')) {
+            
+            const screenshotUrl = `https://api.apiflash.com/v1/urltoimage?access_key=${process.env.APIFLASH_KEY}&url=${encodeURIComponent(url)}&width=600&height=400&fresh=true&format=jpeg&quality=60&response_type=json&full_page=false&delay=2`;
+            
+            const screenshotResponse = await fetch(screenshotUrl, {
+                timeout: SCREENSHOT_TIMEOUT
             });
-            const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
-            return [{
-                label: 'Page Snapshot',
-                image: imageBuffer.toString('base64')
-            }];
+            
+            if (screenshotResponse.ok) {
+                const data = await screenshotResponse.json();
+                const imageResponse = await fetch(data.url, {
+                    timeout: FETCH_TIMEOUT
+                });
+                const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
+                return [{
+                    label: 'Relevant Content',
+                    image: imageBuffer.toString('base64')
+                }];
+            }
         }
     } catch (error) {
         console.log('Screenshot failed:', error.message);
@@ -194,7 +200,7 @@ ${content.paragraphs?.join('\n') || ''}`;
             messages: [
                 {
                     role: "system",
-                    content: "Analyze the provided web content and create a comprehensive summary. Focus on accuracy and recent information. Present information in clear, numbered points. For each point, cite the source URL. If no useful information is found, clearly state this and suggest better search terms."
+                    content: "You are an expert analyst presenting findings in a natural, human way. Create a clear, engaging summary of the information found. Present key points in numbered format, but write conversationally as if you're explaining to someone. Don't include URLs or citations in your response - just present the information naturally. Focus on accuracy and recent information."
                 },
                 {
                     role: "user",
