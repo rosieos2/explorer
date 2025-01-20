@@ -64,11 +64,11 @@ module.exports = async (req, res) => {
             messages: [
                 {
                     role: "system",
-                    content: "You are a web analysis expert focused on football transfer news. Extract and summarize transfer-related information in clear, numbered points. Each point should be a complete piece of news - do not split sentences across multiple points or add bullet points within a numbered item. Format as '1. [complete news item]' for each piece of news."
+                    content: "You are a web analysis expert. Analyze the webpage content based on the specific task requested. Present your findings in clear, numbered points. Each point should be complete and relevant to the requested task."
                 },
                 {
                     role: "user",
-                    content: `Analyze this webpage content and list all transfer news and updates. Each point should be a complete piece of news:\n\nContent: ${content.slice(0, 15000)}`
+                    content: `Analyze this webpage content for the following task: ${task}\n\nContent: ${content.slice(0, 15000)}`
                 }
             ]
         });
