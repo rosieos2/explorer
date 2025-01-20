@@ -4,17 +4,18 @@ const { JSDOM } = require('jsdom');
 
 async function getScreenshots(url, retries = 2) {
     try {
-        console.log('Getting screenshot');
-        const screenshotUrl = `https://api.apiflash.com/v1/urltoimage?access_key=${process.env.APIFLASH_KEY}&url=${encodeURIComponent(url)}&width=800&height=600&fresh=true&format=jpeg&quality=80&response_type=json&full_page=false`;
+        console.log('Getting screenshot for:', url);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        const screenshotUrl = `https://api.apiflash.com/v1/urltoimage?access_key=${process.env.APIFLASH_KEY}&url=${encodeURIComponent(url)}&width=600&height=400&fresh=true&format=jpeg&quality=60&response_type=json&full_page=false&delay=2`;
         
         const screenshotResponse = await fetch(screenshotUrl, {
-            timeout: 8000
+            timeout: 15000
         });
         
         if (screenshotResponse.ok) {
             const data = await screenshotResponse.json();
             const imageResponse = await fetch(data.url, {
-                timeout: 5000
+                timeout: 10000
             });
             const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
             return [{
@@ -25,53 +26,108 @@ async function getScreenshots(url, retries = 2) {
     } catch (error) {
         console.log('Screenshot failed:', error.message);
     }
-    
-    return []; // Return empty array if screenshot fails
+    return [];
+}
+
+async function findRelevantSources(task) {
+    // Ask GPT to suggest relevant URLs based on the task
+    const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY
+    });
+
+    const completion = await openai.chat.completions.create({
+        model: "gpt-4",
+        messages: [
+            {
+                role: "system",
+                content: "You are an expert at finding relevant and reliable web sources. When given a task, suggest 2-3 specific URLs that would be most helpful for that task. Return only a JSON array of URLs, nothing else."
+            },
+            {
+                role: "user",
+                content: task
+            }
+        ]
+    });
+
+    try {
+        return JSON.parse(completion.choices[0].message.content);
+    } catch (error) {
+        console.log('Error parsing URLs:', error);
+        return [];
+    }
+}
+
+async function analyzeSite(url, task) {
+    try {
+        console.log('Analyzing site:', url);
+        const pageResponse = await fetch(url, {
+            timeout: 10000,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+        });
+        const htmlContent = await pageResponse.text();
+        const dom = new JSDOM(htmlContent);
+        const content = dom.window.document.body.textContent;
+        const screenshots = await getScreenshots(url);
+
+        return {
+            url,
+            content: content.slice(0, 15000),
+            screenshots
+        };
+    } catch (error) {
+        console.log(`Failed to analyze ${url}:`, error.message);
+        return null;
+    }
 }
 
 module.exports = async (req, res) => {
     console.log('API endpoint hit');
 
     if (req.method !== 'POST') {
-        console.log('Wrong method:', req.method);
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    console.log('Request body:', req.body);
     const { url, task } = req.body;
 
-    if (!url || !task) {
-        console.log('Missing url or task');
-        return res.status(400).json({ error: 'URL and task are required' });
+    if (!url && !task) {
+        return res.status(400).json({ error: 'URL or task is required' });
     }
 
     try {
-        // Check OpenAI key
         if (!process.env.OPENAI_API_KEY) {
             throw new Error('OpenAI API key is not configured');
         }
 
-        // Initialize OpenAI
-        console.log('Initializing OpenAI');
         const openai = new OpenAI({
             apiKey: process.env.OPENAI_API_KEY
         });
 
-        // Get webpage content
-        console.log('Fetching webpage content');
-        const pageResponse = await fetch(url, {
-            timeout: 10000
-        });
-        const htmlContent = await pageResponse.text();
+        let sitesData = [];
 
-        // Parse the HTML content
-        const dom = new JSDOM(htmlContent);
-        const content = dom.window.document.body.textContent;
+        if (url) {
+            // Single site analysis
+            const siteData = await analyzeSite(url, task);
+            if (siteData) sitesData.push(siteData);
+        } else {
+            // Multi-site analysis based on task
+            console.log('Finding relevant sources for task:', task);
+            const relevantUrls = await findRelevantSources(task);
+            console.log('Found relevant URLs:', relevantUrls);
 
-        // Get screenshots
-        console.log('Getting screenshots');
-        const screenshots = await getScreenshots(url);
-        console.log(`Got ${screenshots.length} screenshots`);
+            const analysisPromises = relevantUrls.map(url => analyzeSite(url, task));
+            sitesData = (await Promise.all(analysisPromises)).filter(Boolean);
+        }
+
+        if (sitesData.length === 0) {
+            throw new Error('Failed to analyze any sites');
+        }
+
+        // Combine content from all sites for analysis
+        const combinedContent = sitesData.map(site => 
+            `Content from ${site.url}:\n${site.content}`
+        ).join('\n\n');
 
         console.log('Making OpenAI request for analysis');
         const completion = await openai.chat.completions.create({
@@ -79,31 +135,35 @@ module.exports = async (req, res) => {
             messages: [
                 {
                     role: "system",
-                    content: "You are a web analysis expert. Analyze the content based on the specific task requested. Present your findings in clear, numbered points. Each point should be complete and relevant to the requested task."
+                    content: "Analyze the content provided and give a comprehensive answer to the user's task. Present information in clear, numbered points. For each point, cite the source URL. If you find conflicting information, note the discrepancies."
                 },
                 {
                     role: "user",
-                    content: `Analyze this webpage content for the following task: ${task}\n\nContent: ${content.slice(0, 15000)}`
+                    content: `Task: ${task}\n\n${combinedContent}`
                 }
             ]
         });
+
+        // Combine all screenshots
+        const allScreenshots = sitesData.flatMap(site => 
+            site.screenshots.map(shot => ({
+                ...shot,
+                source: site.url
+            }))
+        );
 
         console.log('Sending successful response');
         return res.status(200).json({
             success: true,
             data: {
                 analysis: completion.choices[0].message.content,
-                screenshots: screenshots
+                screenshots: allScreenshots,
+                sources: sitesData.map(site => site.url)
             }
         });
 
     } catch (error) {
-        console.error('Detailed API Error:', {
-            message: error.message,
-            stack: error.stack,
-            name: error.name
-        });
-
+        console.error('API Error:', error);
         return res.status(500).json({ 
             error: error.message,
             type: error.name,
