@@ -15,8 +15,5 @@
             "src": "/(.*)",
             "dest": "/public/$1"
         }
-    ],
-    "env": {
-        "MONGODB_URI": "@mongodb_uri"
-    }
+    ]
 }
