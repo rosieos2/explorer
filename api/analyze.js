@@ -8,6 +8,14 @@ const SEARCH_ENDPOINT = 'https://api.bing.microsoft.com/v7.0/search';
 const FETCH_TIMEOUT = 15000;
 const SCREENSHOT_TIMEOUT = 20000;
 
+// Rate limiting and retry configuration
+const RETRY_DELAYS = [1000, 2000, 4000]; // Delays between retries in milliseconds
+const RATE_LIMIT_DELAY = 1000; // Delay between searches in milliseconds
+
+async function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function getScreenshots(url) {
     try {
         console.log('Getting screenshot for:', url);
@@ -84,39 +92,76 @@ async function findRelevantSources(query) {
                 searchUrl.searchParams.set('freshness', params.freshness);
             }
 
-            try {
-                const response = await fetch(searchUrl.toString(), {
-                    headers: {
-                        'Ocp-Apim-Subscription-Key': SEARCH_API_KEY
+            // Add retry logic for each search attempt
+            let lastError = null;
+            for (let retryCount = 0; retryCount <= RETRY_DELAYS.length; retryCount++) {
+                try {
+                    // Add delay between requests to respect rate limits
+                    if (retryCount > 0) {
+                        const delayTime = RETRY_DELAYS[retryCount - 1];
+                        console.log(`Retrying search after ${delayTime}ms delay...`);
+                        await delay(delayTime);
                     }
-                });
 
-                if (!response.ok) {
-                    console.log(`Search failed with params ${JSON.stringify(params)}: ${response.status}`);
-                    continue;
-                }
-
-                const result = await response.json();
-                
-                if (result?.webPages?.value) {
-                    result.webPages.value.forEach(page => {
-                        try {
-                            const url = new URL(page.url);
-                            if (url.protocol === 'https:' || url.protocol === 'http:') {
-                                urls.add(page.url);
-                            }
-                        } catch {
-                            // Invalid URL, skip
+                    const response = await fetch(searchUrl.toString(), {
+                        headers: {
+                            'Ocp-Apim-Subscription-Key': SEARCH_API_KEY
                         }
                     });
-                }
 
-                // If we found some URLs, we can stop trying different parameters
-                if (urls.size > 0) {
-                    break;
+                    if (response.status === 429) {
+                        console.log('Rate limit hit, will retry...');
+                        lastError = new Error('Rate limit exceeded');
+                        continue;
+                    }
+
+                    if (!response.ok) {
+                        console.log(`Search failed with params ${JSON.stringify(params)}: ${response.status}`);
+                        lastError = new Error(`HTTP ${response.status}`);
+                        continue;
+                    }
+
+                    // If we get here, the request was successful
+                    lastError = null;
+                    const result = await response.json();
+                    
+                    if (result?.webPages?.value) {
+                        result.webPages.value.forEach(page => {
+                            try {
+                                const url = new URL(page.url);
+                                if (url.protocol === 'https:' || url.protocol === 'http:') {
+                                    urls.add(page.url);
+                                }
+                            } catch {
+                                // Invalid URL, skip
+                            }
+                        });
+                    }
+
+                    // If we found URLs, break out of the retry loop
+                    if (urls.size > 0) {
+                        break;
+                    }
+
+                    // Add delay before next search parameter set
+                    await delay(RATE_LIMIT_DELAY);
+                    break; // Break retry loop on success
+
+                } catch (error) {
+                    console.log(`Search attempt failed with params ${JSON.stringify(params)}:`, error);
+                    lastError = error;
+                    // Continue to next retry
                 }
-            } catch (error) {
-                console.log(`Search attempt failed with params ${JSON.stringify(params)}:`, error);
+            }
+
+            // If we found URLs, break out of the params loop
+            if (urls.size > 0) {
+                break;
+            }
+
+            // If all retries failed, continue to next params set
+            if (lastError) {
+                console.log(`All retries failed for params ${JSON.stringify(params)}, trying next parameter set...`);
                 continue;
             }
         }
