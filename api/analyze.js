@@ -315,15 +315,14 @@ async function handler(req, res) {
         let sitesData = (await Promise.all(analysisPromises)).filter(Boolean);
 
         if (sitesData.length === 0) {
-            console.log('No sites analyzed successfully, retrying with modified query...');
-            // Try again with a more generalized search
-            const generalQuery = task.split(' ').slice(0, 2).join(' ') + ' latest news';
-            const fallbackUrls = await findRelevantSources(generalQuery);
-            const fallbackAnalysis = await Promise.all(fallbackUrls.map(url => analyzeSite(url, task)));
+            console.log('Initial search returned no results, retrying after delay...');
+            await delay(2000); // Wait 2 seconds before retry
+            const relevantUrls = await findRelevantSources(task);
+            const fallbackAnalysis = await Promise.all(relevantUrls.map(url => analyzeSite(url, task)));
             sitesData = fallbackAnalysis.filter(Boolean);
             
             if (sitesData.length === 0) {
-                throw new Error('Unable to find any relevant information. Please try rephrasing your query.');
+                throw new Error('No results found. Please try again in a moment.');
             }
         }
 
