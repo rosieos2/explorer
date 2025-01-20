@@ -1,3 +1,4 @@
+// vercel.json
 {
     "version": 2,
     "functions": {
@@ -15,5 +16,8 @@
             "src": "/(.*)",
             "dest": "/public/$1"
         }
-    ]
+    ],
+    "env": {
+        "MONGODB_URI": "@mongodb_uri"
+    }
 }

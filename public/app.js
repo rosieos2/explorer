@@ -1,3 +1,4 @@
+// app.js
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('agentForm');
     const loadingDiv = document.getElementById('loading');
@@ -5,6 +6,49 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitBtn = document.getElementById('submitBtn');
     const resultDiv = document.getElementById('result');
     const screenshotsDiv = document.getElementById('screenshots');
+    const terminalContent = document.getElementById('terminalContent');
+
+    // Initialize terminal update
+    function fetchRecentPrompts() {
+        fetch('/api/prompts')
+            .then(response => response.json())
+            .then(prompts => {
+                terminalContent.innerHTML = '';
+                prompts.forEach(prompt => {
+                    const timestamp = new Date(prompt.timestamp).toLocaleTimeString();
+                    const line = createTerminalLine(prompt.prompt, timestamp);
+                    terminalContent.appendChild(line);
+                });
+                terminalContent.scrollTop = terminalContent.scrollHeight;
+            })
+            .catch(error => console.error('Error fetching prompts:', error));
+    }
+
+    function createTerminalLine(content, timestamp) {
+        const line = document.createElement('div');
+        line.className = 'terminal-line';
+        
+        const time = document.createElement('span');
+        time.className = 'terminal-timestamp';
+        time.textContent = timestamp;
+        
+        const prompt = document.createElement('span');
+        prompt.className = 'terminal-prompt';
+        prompt.textContent = '>';
+        
+        const text = document.createElement('span');
+        text.className = 'terminal-command';
+        text.textContent = content;
+        
+        line.appendChild(time);
+        line.appendChild(prompt);
+        line.appendChild(text);
+        
+        return line;
+    }
+
+    // Update terminal every 3 seconds
+    setInterval(fetchRecentPrompts, 3000);
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -20,6 +64,16 @@ document.addEventListener('DOMContentLoaded', () => {
         resultDiv.innerHTML = '';
 
         try {
+            // Save prompt to database
+            await fetch('/api/prompts', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt: task })
+            });
+
+            // Process the analysis
             const response = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: {
@@ -79,13 +133,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function formatAnalysis(analysis) {
-        // Split by numbered points and preserve formatting
         return analysis
             .split('\n')
             .map(line => {
                 const trimmed = line.trim();
                 if (!trimmed) return '';
-                // Check if line is a numbered point
                 const isNumberedPoint = /^\d+\.\s/.test(trimmed);
                 return `<div class="data-item">
                     <span class="data-value">${isNumberedPoint ? trimmed : '• ' + trimmed}</span>
@@ -118,13 +170,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function parseAnalysis(analysisText) {
-        // Clean up the text
         const cleanText = analysisText
             .split('\n')
             .map(line => line.trim())
             .filter(line => line.length > 0);
 
-        // Split by numbered points if they exist
         const formattedText = cleanText
             .join('\n')
             .split(/(?=\d+\.\s+)/g)
