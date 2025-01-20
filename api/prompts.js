@@ -9,10 +9,8 @@ async function connectToDatabase() {
     
     try {
         const client = await MongoClient.connect(process.env.MONGODB_URI, {
-            ssl: true,
-            tls: true,
-            minVersion: 'TLSv1.2',
-            maxVersion: 'TLSv1.3'
+            minVersion: 'TLS1_2',
+            maxVersion: 'TLS1_3'
         });
         
         const db = client.db("webagent");
@@ -25,6 +23,10 @@ async function connectToDatabase() {
 }
 
 export default async function handler(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
     if (req.method === 'OPTIONS') {
         res.status(200).end();
         return;
