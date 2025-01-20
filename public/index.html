@@ -203,6 +203,156 @@
     line-height: 1;
 }
 
+.terminal-section {
+    padding: 60px 0;
+    background: #1a1a1a;
+}
+
+.terminal-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.terminal-header {
+    text-align: center;
+    margin-bottom: 40px;
+    color: #fff;
+}
+
+.terminal-header h2 {
+    font-size: 2.5rem;
+    margin-bottom: 16px;
+}
+
+.terminal-header p {
+    color: #a0aec0;
+    font-size: 1.1rem;
+}
+
+.terminal-window {
+    background: #000;
+    border-radius: 8px;
+    padding: 16px;
+    font-family: 'SF Mono', 'Consolas', monospace;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.terminal-titlebar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.terminal-button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.terminal-close { background: #ff5f56; }
+.terminal-minimize { background: #ffbd2e; }
+.terminal-zoom { background: #27c93f; }
+
+.terminal-content {
+    height: 400px;
+    overflow-y: auto;
+    color: #fff;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.terminal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.terminal-content::-webkit-scrollbar-track {
+    background: #1a1a1a;
+}
+
+.terminal-content::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 4px;
+}
+
+.terminal-line {
+    margin-bottom: 8px;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeIn 0.3s ease forwards;
+}
+
+.terminal-timestamp {
+    color: #66c2ff;
+    margin-right: 8px;
+}
+
+.terminal-prompt {
+    color: #50fa7b;
+    margin-right: 8px;
+}
+
+.terminal-command {
+    color: #fff;
+}
+
+.terminal-output {
+    color: #8be9fd;
+    padding-left: 20px;
+    margin-top: 4px;
+}
+
+.terminal-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 15px;
+    background: #fff;
+    margin-left: 4px;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stats-bar {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 41px;
+    color: #fff;
+    text-align: center;
+}
+
+.stat-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+    min-width: 200px;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #50fa7b;
+}
+
+.stat-label {
+    color: #a0aec0;
+    font-size: 0.9rem;
+}
+
 .accessibility-section {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -895,6 +1045,42 @@
             </div>
         </div>
     </div>
+
+    <!-- Terminal Section -->
+<div class="terminal-section">
+    <div class="terminal-container">
+        <div class="terminal-header">
+            <h2>Building Our Dataset</h2>
+            <p>Watch our AI learn from real-world interactions in real-time</p>
+        </div>
+        
+        <div class="terminal-window">
+            <div class="terminal-titlebar">
+                <div class="terminal-button terminal-close"></div>
+                <div class="terminal-button terminal-minimize"></div>
+                <div class="terminal-button terminal-zoom"></div>
+            </div>
+            <div class="terminal-content" id="terminalContent">
+                <!-- Terminal content will be dynamically populated -->
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="promptCount">147,382</div>
+                <div class="stat-label">Prompts Collected</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="activeUsers">1,293</div>
+                <div class="stat-label">Active Users</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="dataSize">2.8TB</div>
+                <div class="stat-label">Dataset Size</div>
+            </div>
+        </div>
+    </div>
+</div>
 
     <!-- Integration Section -->
     <div class="integration-section">
