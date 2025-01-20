@@ -11,7 +11,8 @@ async function connectToDatabase() {
         const client = await MongoClient.connect(process.env.MONGODB_URI, {
             ssl: true,
             tls: true,
-            retryWrites: true
+            minVersion: 'TLSv1.2',
+            maxVersion: 'TLSv1.3'
         });
         
         const db = client.db("webagent");
