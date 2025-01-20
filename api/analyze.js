@@ -78,8 +78,14 @@ async function findRelevantSources(query) {
 
         const searchResults = await searchResponse.json();
         
+        // Validate search results structure
+        if (!searchResults || !searchResults.webPages || !Array.isArray(searchResults.webPages.value)) {
+            console.log('Invalid search results structure, using fallback sources');
+            return getFallbackSources(query);
+        }
+        
         // Extract and validate URLs
-        return searchResults.webPages.value
+        const urls = searchResults.webPages.value
             .map(result => result.url)
             .filter(url => {
                 try {
@@ -90,16 +96,30 @@ async function findRelevantSources(query) {
                 }
             });
 
+        // If no valid URLs found, use fallback
+        if (urls.length === 0) {
+            console.log('No valid URLs found, using fallback sources');
+            return getFallbackSources(query);
+        }
+
+        return urls;
+
     } catch (error) {
         console.error('Search error:', error);
-        // Fallback to reliable news sources if search fails
-        return [
-            'https://www.bbc.com/sport',
-            'https://www.theguardian.com/sport',
-            'https://www.skysports.com',
-            'https://www.espn.com'
-        ].filter(url => url.includes(query.toLowerCase()));
+        return getFallbackSources(query);
     }
+}
+
+// Separate function for fallback sources
+function getFallbackSources(query) {
+    const fallbackSources = [
+        `https://www.bbc.com/sport/football/${query.toLowerCase()}`,
+        `https://www.skysports.com/search?q=${encodeURIComponent(query)}`,
+        `https://www.espn.com/search/_/q/${encodeURIComponent(query)}`,
+        `https://www.goal.com/search?q=${encodeURIComponent(query)}`
+    ];
+
+    return fallbackSources;
 }
 
 async function analyzeSite(url, task) {
