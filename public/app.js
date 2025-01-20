@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultDiv = document.getElementById('result');
     const screenshotsDiv = document.getElementById('screenshots');
     const terminalContent = document.getElementById('terminalContent');
+    const searchInput = document.getElementById('terminalSearch');
 
     // Initialize terminal update
     function fetchRecentPrompts() {
@@ -26,13 +27,36 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(error => console.error('Error fetching prompts:', error));
     }
 
+    searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const terminalLines = document.querySelectorAll('.terminal-line');
+        
+        terminalLines.forEach(line => {
+            const content = line.querySelector('.terminal-command').textContent.toLowerCase();
+            if (content.includes(searchTerm)) {
+                line.classList.remove('hidden');
+            } else {
+                line.classList.add('hidden');
+            }
+        });
+    });
+
     function createTerminalLine(content, timestamp) {
         const line = document.createElement('div');
         line.className = 'terminal-line';
         
         const time = document.createElement('span');
         time.className = 'terminal-timestamp';
-        time.textContent = timestamp;
+        time.textContent = new Date(timestamp).toLocaleTimeString('en-US', {
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        
+        const dir = document.createElement('span');
+        dir.className = 'terminal-dir';
+        dir.textContent = 'C:\\webagent>';
         
         const prompt = document.createElement('span');
         prompt.className = 'terminal-prompt';
@@ -42,9 +66,32 @@ document.addEventListener('DOMContentLoaded', () => {
         text.className = 'terminal-command';
         text.textContent = content;
         
+        // Add copy button
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'terminal-copy-btn';
+        copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>`;
+        
+        copyBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            
+            // Copy the content
+            try {
+                await navigator.clipboard.writeText(content);
+                copyBtn.classList.add('copy-success');
+                setTimeout(() => copyBtn.classList.remove('copy-success'), 1000);
+            } catch (err) {
+                console.error('Failed to copy:', err);
+            }
+        });
+        
         line.appendChild(time);
+        line.appendChild(dir);
         line.appendChild(prompt);
         line.appendChild(text);
+        line.appendChild(copyBtn);
         
         return line;
     }
