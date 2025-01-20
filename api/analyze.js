@@ -51,6 +51,7 @@ async function findRelevantSources(query) {
                             "2. Add relevant context and specific terms to improve search accuracy" +
                             "3. Include time-based terms for recent information if appropriate" +
                             "4. Format the query to maximize relevance in web searches" +
+                            "5. Remove any special characters that might interfere with search" +
                             "Return only the optimized search query, no explanations."
                 },
                 {
@@ -63,38 +64,62 @@ async function findRelevantSources(query) {
 
         const searchQuery = searchCompletion.choices[0].message.content;
         
-        // Perform multiple searches with different freshness parameters
-        const searchResponses = await Promise.all([
-            fetch(`${SEARCH_ENDPOINT}?q=${encodeURIComponent(searchQuery)}&count=10&responseFilter=Webpages&freshness=Day`, {
-                headers: {
-                    'Ocp-Apim-Subscription-Key': SEARCH_API_KEY
-                }
-            }),
-            fetch(`${SEARCH_ENDPOINT}?q=${encodeURIComponent(searchQuery)}&count=10&responseFilter=Webpages&freshness=Week`, {
-                headers: {
-                    'Ocp-Apim-Subscription-Key': SEARCH_API_KEY
-                }
-            })
-        ]);
+        // Define different search parameters for multiple attempts
+        const searchParams = [
+            { freshness: 'Day', count: 10 },
+            { freshness: 'Week', count: 10 },
+            { freshness: 'Month', count: 10 },
+            { count: 10 } // No freshness parameter as fallback
+        ];
 
-        const results = await Promise.all(searchResponses.map(response => response.json()));
-        
-        // Combine and deduplicate results
         const urls = new Set();
-        results.forEach(result => {
-            if (result?.webPages?.value) {
-                result.webPages.value.forEach(page => {
-                    try {
-                        const url = new URL(page.url);
-                        if (url.protocol === 'https:' || url.protocol === 'http:') {
-                            urls.add(page.url);
-                        }
-                    } catch {
-                        // Invalid URL, skip
+        
+        // Try each search parameter set sequentially until we get results
+        for (const params of searchParams) {
+            const searchUrl = new URL(SEARCH_ENDPOINT);
+            searchUrl.searchParams.set('q', searchQuery);
+            searchUrl.searchParams.set('count', params.count.toString());
+            searchUrl.searchParams.set('responseFilter', 'Webpages');
+            if (params.freshness) {
+                searchUrl.searchParams.set('freshness', params.freshness);
+            }
+
+            try {
+                const response = await fetch(searchUrl.toString(), {
+                    headers: {
+                        'Ocp-Apim-Subscription-Key': SEARCH_API_KEY
                     }
                 });
+
+                if (!response.ok) {
+                    console.log(`Search failed with params ${JSON.stringify(params)}: ${response.status}`);
+                    continue;
+                }
+
+                const result = await response.json();
+                
+                if (result?.webPages?.value) {
+                    result.webPages.value.forEach(page => {
+                        try {
+                            const url = new URL(page.url);
+                            if (url.protocol === 'https:' || url.protocol === 'http:') {
+                                urls.add(page.url);
+                            }
+                        } catch {
+                            // Invalid URL, skip
+                        }
+                    });
+                }
+
+                // If we found some URLs, we can stop trying different parameters
+                if (urls.size > 0) {
+                    break;
+                }
+            } catch (error) {
+                console.log(`Search attempt failed with params ${JSON.stringify(params)}:`, error);
+                continue;
             }
-        });
+        }
         
         return Array.from(urls);
 
@@ -245,7 +270,16 @@ async function handler(req, res) {
         const sitesData = (await Promise.all(analysisPromises)).filter(Boolean);
 
         if (sitesData.length === 0) {
-            throw new Error('Failed to analyze any sites');
+            console.log('No sites analyzed successfully, retrying with modified query...');
+            // Try again with a more generalized search
+            const generalQuery = task.split(' ').slice(0, 2).join(' ') + ' latest news';
+            const fallbackUrls = await findRelevantSources(generalQuery);
+            const fallbackAnalysis = await Promise.all(fallbackUrls.map(url => analyzeSite(url, task)));
+            sitesData = fallbackAnalysis.filter(Boolean);
+            
+            if (sitesData.length === 0) {
+                throw new Error('Unable to find any relevant information. Please try rephrasing your query.');
+            }
         }
 
         const analysis = await analyzeContent(task, sitesData);
