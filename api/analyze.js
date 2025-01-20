@@ -30,21 +30,33 @@ module.exports = async (req, res) => {
             apiKey: process.env.OPENAI_API_KEY
         });
 
-        // Get webpage content using fetch
+        // Get webpage content using fetch with timeout
         console.log('Fetching webpage content');
-        const pageResponse = await fetch(url);
+        const pageResponse = await fetch(url, { 
+            timeout: 10000  // 10 second timeout
+        });
         const htmlContent = await pageResponse.text();
 
         // Use JSDOM to parse HTML and get text content
         const dom = new JSDOM(htmlContent);
         const content = dom.window.document.body.textContent;
 
-        // Get screenshot using APIFlash
-        console.log('Getting screenshot');
-        const screenshotUrl = `https://api.apiflash.com/v1/urltoimage?access_key=${process.env.APIFLASH_KEY}&url=${encodeURIComponent(url)}&full_page=true&fresh=true`;
-        const screenshotResponse = await fetch(screenshotUrl);
-        const screenshot = Buffer.from(await screenshotResponse.arrayBuffer());
-        const base64Screenshot = screenshot.toString('base64');
+        // Try to get screenshot but don't let it block the whole request
+        let base64Screenshot = null;
+        try {
+            console.log('Getting screenshot');
+            const screenshotUrl = `https://api.apiflash.com/v1/urltoimage?access_key=${process.env.APIFLASH_KEY}&url=${encodeURIComponent(url)}&full_page=true&fresh=true`;
+            const screenshotResponse = await fetch(screenshotUrl, {
+                timeout: 8000  // 8 second timeout
+            });
+            if (screenshotResponse.ok) {
+                const screenshot = Buffer.from(await screenshotResponse.arrayBuffer());
+                base64Screenshot = screenshot.toString('base64');
+            }
+        } catch (screenshotError) {
+            console.log('Screenshot failed:', screenshotError.message);
+            // Continue without screenshot
+        }
 
         console.log('Making OpenAI request');
         const completion = await openai.chat.completions.create({
@@ -52,11 +64,11 @@ module.exports = async (req, res) => {
             messages: [
                 {
                     role: "system",
-                    content: "You are a web analysis expert. Analyze the content and provide relevant information. Format your response in clear, numbered points. Focus on the specific task requested."
+                    content: "You are a web analysis expert focused on football transfer news. Extract and summarize transfer-related information in clear, numbered points. Focus on recent transfer news, rumors, and updates."
                 },
                 {
                     role: "user",
-                    content: `Analyze this webpage content for the task: ${task}\n\nContent: ${content.slice(0, 15000)}`
+                    content: `Analyze this webpage content for football transfer news and updates:\n\nContent: ${content.slice(0, 15000)}`
                 }
             ]
         });
