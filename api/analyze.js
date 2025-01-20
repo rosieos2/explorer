@@ -2,6 +2,12 @@ const { OpenAI } = require('openai');
 const fetch = require('node-fetch');
 const { JSDOM } = require('jsdom');
 
+// Search API configuration
+const SEARCH_API_KEY = process.env.BING_API_KEY;
+const SEARCH_ENDPOINT = 'https://api.bing.microsoft.com/v7.0/search';
+const FETCH_TIMEOUT = 15000;
+const SCREENSHOT_TIMEOUT = 20000;
+
 async function getScreenshots(url, retries = 2) {
     try {
         console.log('Getting screenshot for:', url);
@@ -9,13 +15,13 @@ async function getScreenshots(url, retries = 2) {
         const screenshotUrl = `https://api.apiflash.com/v1/urltoimage?access_key=${process.env.APIFLASH_KEY}&url=${encodeURIComponent(url)}&width=600&height=400&fresh=true&format=jpeg&quality=60&response_type=json&full_page=false&delay=2`;
         
         const screenshotResponse = await fetch(screenshotUrl, {
-            timeout: 30000
+            timeout: SCREENSHOT_TIMEOUT
         });
         
         if (screenshotResponse.ok) {
             const data = await screenshotResponse.json();
             const imageResponse = await fetch(data.url, {
-                timeout: 30000
+                timeout: FETCH_TIMEOUT
             });
             const imageBuffer = Buffer.from(await imageResponse.arrayBuffer());
             return [{
@@ -29,76 +35,98 @@ async function getScreenshots(url, retries = 2) {
     return [];
 }
 
-async function findRelevantSources(task) {
-    const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY
-    });
-
+async function findRelevantSources(query) {
     try {
-        const completion = await openai.chat.completions.create({
+        // First, optimize the search query using GPT
+        const openai = new OpenAI({
+            apiKey: process.env.OPENAI_API_KEY
+        });
+
+        const searchCompletion = await openai.chat.completions.create({
             model: "gpt-4",
             messages: [
                 {
                     role: "system",
-                    content: `You are an expert at finding relevant and reliable web sources. When given a task, provide ONLY real, complete URLs that currently exist and contain relevant information. For example:
-                    - For gaming cafes in London: "https://www.timeout.com/london/things-to-do/best-gaming-cafes-in-london"
-                    - NOT just "www.timeout.com" or "timeout.com/london"
-                    Return only complete, working URLs in a JSON array. Double check that each URL pattern matches real pages.`
+                    content: "Convert user queries into optimal search terms. Focus on relevance and recency. For news queries, add 'news' if not present. Return only the search query, no explanation."
                 },
                 {
                     role: "user",
-                    content: task
+                    content: query
                 }
             ],
-            max_tokens: 500
+            max_tokens: 50
         });
 
-        const urls = JSON.parse(completion.choices[0].message.content);
+        const searchQuery = searchCompletion.choices[0].message.content;
         
-        // Validate URLs
-        return urls.filter(url => {
-            try {
-                const urlObj = new URL(url);
-                return urlObj.protocol === 'https:' || urlObj.protocol === 'http:';
-            } catch {
-                return false;
+        // Perform web search
+        const searchResponse = await fetch(`${SEARCH_ENDPOINT}?q=${encodeURIComponent(searchQuery)}&count=5&responseFilter=Webpages`, {
+            headers: {
+                'Ocp-Apim-Subscription-Key': SEARCH_API_KEY
             }
         });
+
+        if (!searchResponse.ok) {
+            throw new Error('Search API error');
+        }
+
+        const searchResults = await searchResponse.json();
+        
+        // Extract and validate URLs
+        return searchResults.webPages.value
+            .map(result => result.url)
+            .filter(url => {
+                try {
+                    const urlObj = new URL(url);
+                    return urlObj.protocol === 'https:' || urlObj.protocol === 'http:';
+                } catch {
+                    return false;
+                }
+            });
+
     } catch (error) {
-        console.log('Error finding sources:', error);
-        return [];
+        console.error('Search error:', error);
+        // Fallback to reliable news sources if search fails
+        return [
+            'https://www.bbc.com/sport',
+            'https://www.theguardian.com/sport',
+            'https://www.skysports.com',
+            'https://www.espn.com'
+        ].filter(url => url.includes(query.toLowerCase()));
     }
 }
 
 async function analyzeSite(url, task) {
     try {
         console.log('Analyzing site:', url);
-        const pageResponse = await fetch(url, {
-            timeout: 30000,
+        const response = await fetch(url, {
+            timeout: FETCH_TIMEOUT,
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5'
             }
         });
-        
-        // Check if page exists
-        if (!pageResponse.ok) {
-            console.log(`Failed to fetch ${url}: ${pageResponse.status} ${pageResponse.statusText}`);
-            return null;
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch ${url}: ${response.status}`);
         }
 
-        const htmlContent = await pageResponse.text();
-        const dom = new JSDOM(htmlContent);
-        
-        // Extract specific content instead of full body text
+        const html = await response.text();
+        const dom = new JSDOM(html);
+
+        // Extract main content
         const mainContent = {
             title: dom.window.document.title,
+            article: dom.window.document.querySelector('article')?.textContent?.trim(),
             headings: Array.from(dom.window.document.querySelectorAll('h1, h2, h3'))
                 .map(h => h.textContent.trim())
                 .filter(Boolean)
                 .slice(0, 10),
-            paragraphs: Array.from(dom.window.document.querySelectorAll('p'))
+            paragraphs: Array.from(dom.window.document.querySelectorAll('article p, main p, .content p'))
                 .map(p => p.textContent.trim())
                 .filter(Boolean)
+                .filter(text => text.length > 50)
                 .slice(0, 20)
         };
 
@@ -106,7 +134,7 @@ async function analyzeSite(url, task) {
 
         return {
             url,
-            content: JSON.stringify(mainContent).slice(0, 8000),
+            content: JSON.stringify(mainContent),
             screenshots
         };
     } catch (error) {
@@ -131,6 +159,10 @@ module.exports = async (req, res) => {
             throw new Error('OpenAI API key is not configured');
         }
 
+        if (!process.env.BING_API_KEY) {
+            throw new Error('Search API key is not configured');
+        }
+
         const openai = new OpenAI({
             apiKey: process.env.OPENAI_API_KEY
         });
@@ -152,8 +184,8 @@ module.exports = async (req, res) => {
             return `Content from ${site.url}:
 Title: ${content.title}
 Key Information:
-${content.headings.join('\n')}
-${content.paragraphs.join('\n')}`;
+${content.headings?.join('\n') || ''}
+${content.paragraphs?.join('\n') || ''}`;
         }).join('\n\n').slice(0, 12000);
 
         console.log('Making OpenAI request for analysis');
@@ -162,7 +194,7 @@ ${content.paragraphs.join('\n')}`;
             messages: [
                 {
                     role: "system",
-                    content: "Analyze the content provided and give a comprehensive answer to the user's task. Present information in clear, numbered points. For each point, cite the source URL where possible. Focus on the most relevant and useful information. If no useful information is found, clearly state this and suggest alternative approaches."
+                    content: "Analyze the provided web content and create a comprehensive summary. Focus on accuracy and recent information. Present information in clear, numbered points. For each point, cite the source URL. If no useful information is found, clearly state this and suggest better search terms."
                 },
                 {
                     role: "user",
