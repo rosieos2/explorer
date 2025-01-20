@@ -2,8 +2,6 @@
     "name": "web-agent",
     "version": "1.0.0",
     "dependencies": {
-        "chrome-aws-lambda": "6.0.0",
-        "puppeteer-core": "6.0.0",
         "openai": "^4.0.0"
     },
     "engines": {
