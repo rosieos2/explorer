@@ -45,26 +45,6 @@ async function getScreenshots(url) {
 
 async function findRelevantSources(query) {
     try {
-        const openai = new OpenAI({
-            apiKey: process.env.OPENAI_API_KEY
-        });
-
-        const searchCompletion = await openai.chat.completions.create({
-            model: "gpt-4",
-            messages: [
-                {
-                    role: "system",
-                    content: "You are a search optimization expert. Format the query to maximize relevance in web searches. Return only the optimized query, no explanations."
-                },
-                {
-                    role: "user",
-                    content: query
-                }
-            ],
-            max_tokens: 100
-        });
-
-        const searchQuery = searchCompletion.choices[0].message.content;
         const urls = new Set();
         
         // Simple search with retry
@@ -75,7 +55,7 @@ async function findRelevantSources(query) {
                     await delay(RETRY_DELAYS[retryCount - 1]);
                 }
 
-                const response = await fetch(`${SEARCH_ENDPOINT}?q=${encodeURIComponent(searchQuery)}&count=50`, {
+                const response = await fetch(`${SEARCH_ENDPOINT}?q=${encodeURIComponent(query)}&count=50`, {
                     headers: {
                         'Ocp-Apim-Subscription-Key': SEARCH_API_KEY
                     }
