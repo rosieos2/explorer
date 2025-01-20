@@ -1,3 +1,4 @@
+const fetch = require('node-fetch');
 const { OpenAI } = require('openai');
 
 module.exports = async (req, res) => {
@@ -11,6 +12,12 @@ module.exports = async (req, res) => {
     console.log('Received request:', { url, task });
 
     try {
+        // Fetch the webpage content
+        console.log('Fetching webpage content');
+        const response = await fetch(url);
+        const html = await response.text();
+
+        // Initialize OpenAI
         console.log('Initializing OpenAI');
         const openai = new OpenAI({
             apiKey: process.env.OPENAI_API_KEY
@@ -22,11 +29,11 @@ module.exports = async (req, res) => {
             messages: [
                 { 
                     role: "system", 
-                    content: "You are a web analysis expert. The user will provide a URL and task. Explain that you cannot directly access the URL but you can help with the task based on general knowledge."
+                    content: "You are a web analysis expert specializing in extracting and summarizing sports news. Focus on providing clear, concise summaries of the most relevant information."
                 },
                 { 
                     role: "user", 
-                    content: `The user wants to analyze this URL: ${url}\nTask: ${task}`
+                    content: `Analyze this webpage content and provide relevant information for the task: ${task}\n\nContent: ${html}`
                 }
             ]
         });
@@ -35,8 +42,7 @@ module.exports = async (req, res) => {
         return res.status(200).json({
             success: true,
             data: {
-                analysis: completion.choices[0].message.content,
-                screenshot: null
+                analysis: completion.choices[0].message.content
             }
         });
 
