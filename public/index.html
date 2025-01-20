@@ -21,9 +21,7 @@
 
         .learning-evolution {
     margin-bottom: 60px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+    position: relative;
 }
 
 .evolution-step {
@@ -56,8 +54,46 @@
     gap: 20px;
 }
 
+.evolution-flow {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    margin-bottom: 40px;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.model-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    position: relative;
+}
+
+.gpt-logo {
+    width: 64px;
+    height: 64px;
+    background: #000;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.gpt-logo img {
+    width: 48px;
+    height: 48px;
+}
+
+.robot-stage {
+    text-align: center;
+}
+
 .robot-icon {
-    font-size: 32px;
+    font-size: 48px;
     margin-bottom: 8px;
 }
 
@@ -67,6 +103,7 @@
     padding: 4px 12px;
     border-radius: 16px;
     font-size: 0.8rem;
+    margin-top: 8px;
 }
 
 .environment-box {
@@ -129,6 +166,24 @@
     font-weight: 500;
 }
 
+.real-world-section {
+    margin-top: 40px;
+    padding: 30px;
+    border: 2px dashed #CBD5E0;
+    border-radius: 16px;
+    position: relative;
+}
+
+.real-world-label {
+    position: absolute;
+    bottom: -12px;
+    right: 20px;
+    background: #F7FAFC;
+    padding: 0 10px;
+    color: #4A5568;
+    font-weight: 500;
+}
+
 .process-steps {
     display: flex;
     justify-content: center;
@@ -152,10 +207,18 @@
 }
 
 /* Make the cycle arrows more prominent */
-.cycle-arrows {
+.arrow-flow {
     font-size: 24px;
-    font-weight: bold;
     color: #4A5568;
+}
+
+.cycle-arrows {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #4A5568;
+    font-size: 20px;
+    margin-top: 8px;
 }
 
 /* Add horizontal arrows for phases */
@@ -201,6 +264,12 @@
             overflow: hidden;
             z-index: 100;
         }
+
+        .stage-label {
+    font-weight: 500;
+    color: #2D3748;
+}
+
 
         #character-canvas {
             width: 100%;
@@ -395,9 +464,9 @@
 
         /* How It Works Section */
         .how-it-works {
-            padding: 80px 0;
-            background: var(--background-color);
-        }
+    padding: 80px 0;
+    background: #F7FAFC;
+}
 
         .how-it-works .container {
             max-width: 800px;
@@ -451,6 +520,28 @@
             margin-left: 16px;
         }
 
+        .environment-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+    margin-top: 20px;
+}
+
+.web-environment {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.platform-icons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(48px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+
         .environment {
             margin-bottom: 24px;
         }
@@ -478,8 +569,13 @@
         }
 
         .process-steps {
-            margin: 24px 0;
-        }
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    background: #E2E8F0;
+    padding: 20px;
+    border-radius: 8px;
+}
 
         .process-step {
             display: inline-block;
@@ -492,9 +588,13 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
+        
         .screenshot-section {
-            margin-top: 24px;
-        }
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
 
         .screenshot-section h3 {
             font-size: 1.1rem;
@@ -509,16 +609,17 @@
             margin-bottom: 16px;
         }
 
-        .accessibility-tree {
-            background: #1A202C;
-            color: #E2E8F0;
-            padding: 16px;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 0.9rem;
-            line-height: 2;
-            line-height: 1.6;
-        }
+        
+.accessibility-tree {
+    margin-top: 16px;
+    background: #1A202C;
+    color: #E2E8F0;
+    padding: 16px;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
 
         /* Integration Section */
         .integration-section {
@@ -712,89 +813,88 @@
     </div>
 
     <!-- How It Works Section -->
-<div class="how-it-works">
-    <div class="container">
-        <h2>How It Works</h2>
-        
-        <!-- Learning Evolution -->
-        <div class="learning-evolution">
-            <!-- GPT Start -->
-            <div class="evolution-step">
-                <div class="model-block">
-                    <img src="/api/placeholder/64/64" alt="GPT Model" class="gpt-icon">
-                    <span class="model-label">GPT-4o</span>
-                </div>
-                <div class="arrow-flow">→</div>
-            </div>
-
-            <!-- Evolution Process -->
-            <div class="evolution-phases">
-                <div class="phase">
-                    <div class="phase-content">
+    <div class="how-it-works">
+        <div class="container">
+            <h2>How It Works</h2>
+            
+            <div class="learning-evolution">
+                <div class="evolution-flow">
+                    <!-- GPT-4o Stage -->
+                    <div class="model-stage">
+                        <div class="gpt-logo">
+                            <img src="/api/placeholder/48/48" alt="GPT-4o">
+                        </div>
+                        <span class="stage-label">GPT-4o</span>
+                    </div>
+    
+                    <span class="arrow-flow">→</span>
+    
+                    <!-- First Robot Stage -->
+                    <div class="robot-stage">
                         <div class="robot-icon">🤖</div>
-                        <div class="phase-title">Imitation Learning</div>
+                        <div class="stage-label">Imitation Learning</div>
                         <div class="cycle-arrows">↑↓</div>
                     </div>
-                    <div class="horizontal-arrow">→</div>
-                </div>
-
-                <div class="phase">
-                    <div class="phase-content">
+    
+                    <span class="arrow-flow">→</span>
+    
+                    <!-- Second Robot Stage -->
+                    <div class="robot-stage">
                         <div class="robot-icon">🤖</div>
-                        <div class="phase-title">Self-Explore Learning</div>
+                        <div class="stage-label">Self-Explore Learning</div>
                         <div class="trajectory-tag">Multimodal Trajectories</div>
                         <div class="cycle-arrows">↑↓</div>
                     </div>
-                    <div class="horizontal-arrow">→</div>
-                </div>
-
-                <div class="phase">
-                    <div class="phase-content">
+    
+                    <span class="arrow-flow">→</span>
+    
+                    <!-- Final Robot Stage -->
+                    <div class="robot-stage">
                         <div class="robot-icon">🤖</div>
-                        <div class="phase-title">Advanced Agent</div>
+                        <div class="stage-label">Advanced Agent</div>
                         <div class="cycle-arrows">↑↓</div>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="real-world-environment">
-            <!-- Environment Box -->
-            <div class="environment-box">
-                <h3>Real-World Web Environment</h3>
-                <div class="platform-grid">
-                    <img src="/api/placeholder/48/48" alt="ESPN">
-                    <img src="/api/placeholder/48/48" alt="GitHub">
-                    <img src="/api/placeholder/48/48" alt="Amazon">
-                    <img src="/api/placeholder/48/48" alt="IMDb">
-                    <span class="more-platforms">...</span>
-                </div>
-            </div>
-
-            <!-- Process Steps -->
-            <div class="process-steps">
-                <div class="process-step">Observation</div>
-                <div class="process-step">Thought</div>
-                <div class="process-step">Action</div>
-            </div>
-
-            <!-- Screenshot Section -->
-            <div class="accessibility-section">
-                <h3>Screenshot & Accessibility Tree</h3>
-                <div class="screenshot-container">
-                    <img src="/api/placeholder/400/200" alt="Website Screenshot" class="screenshot">
-                    <div class="accessibility-tree">
-                        [1] RootWebArea 'Website'
-                        [2] link 'Skip to main content'
-                        [3] navigation 'navigation'
-                        [4] link 'Amazon'
-                        ...
+    
+            <div class="real-world-section">
+                <div class="environment-grid">
+                    <!-- Web Environment -->
+                    <div class="web-environment">
+                        <h3>Real-World Web Environment</h3>
+                        <div class="platform-icons">
+                            <img src="/api/placeholder/48/48" alt="ESPN">
+                            <img src="/api/placeholder/48/48" alt="GitHub">
+                            <img src="/api/placeholder/48/48" alt="Amazon">
+                            <img src="/api/placeholder/48/48" alt="IMDb">
+                            <span>...</span>
+                        </div>
+                    </div>
+    
+                    <!-- Process Steps -->
+                    <div class="process-steps">
+                        <div>Observation</div>
+                        <div>Thought</div>
+                        <div>Action</div>
+                    </div>
+    
+                    <!-- Screenshot Section -->
+                    <div class="screenshot-section">
+                        <h3>Screenshot & Accessibility Tree</h3>
+                        <img src="/api/placeholder/400/200" alt="Website Screenshot" class="screenshot">
+                        <div class="accessibility-tree">
+                            [1] RootWebArea 'Website'
+                            [2] link 'Skip to main content'
+                            [3] navigation 'navigation'
+                            [4] link 'Amazon'
+                            ...
+                        </div>
                     </div>
                 </div>
+                <div class="real-world-label">Real World Self-Exploration</div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- Integration Section -->
     <div class="integration-section">
