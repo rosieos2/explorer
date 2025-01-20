@@ -1,0 +1,21 @@
+{
+    "name": "web-agent",
+    "version": "1.0.0",
+    "description": "Intelligent web agent for automation and data collection",
+    "main": "app.js",
+    "scripts": {
+        "start": "node server.js",
+        "dev": "nodemon server.js"
+    },
+    "dependencies": {
+        "puppeteer-core": "^21.5.0",
+        "chrome-aws-lambda": "^10.1.0",
+        "openai": "^4.0.0"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.22"
+    },
+    "engines": {
+        "node": ">=14"
+    }
+}
