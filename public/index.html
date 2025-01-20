@@ -283,11 +283,22 @@
     opacity: 0;
     transform: translateY(10px);
     animation: fadeIn 0.3s ease forwards;
+    font-family: 'Consolas', monospace;
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+}
+
+.terminal-dir {
+    color: #4CD137;
+    margin-right: 8px;
 }
 
 .terminal-timestamp {
     color: #66c2ff;
     margin-right: 8px;
+    font-size: 0.8rem;
+    opacity: 0.8;
 }
 
 .terminal-prompt {
@@ -297,6 +308,48 @@
 
 .terminal-command {
     color: #fff;
+    word-break: break-word;
+}
+
+.terminal-line:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    padding: 4px;
+    margin: -4px;
+    cursor: pointer;
+}
+
+.terminal-copy-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: #a0aec0;
+    padding: 4px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    width: auto;  /* Override your existing button styles */
+}
+
+.terminal-line:hover .terminal-copy-btn {
+    opacity: 1;
+}
+
+.terminal-copy-btn:hover {
+    color: #50fa7b;
+    transform: translateY(-50%) scale(1.1);
+}
+
+@keyframes copySuccess {
+    0% { color: #50fa7b; }
+    100% { color: #a0aec0; }
+}
+
+.copy-success {
+    animation: copySuccess 1s ease;
 }
 
 .terminal-output {
@@ -409,6 +462,51 @@
         .nav-links a:hover {
             color: var(--accent-color);
         }
+
+        .terminal-controls {
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.search-container {
+    position: relative;
+    width: 300px;
+}
+
+.terminal-search {
+    width: 100%;
+    padding: 8px 16px;
+    padding-left: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.terminal-search:focus {
+    outline: none;
+    border-color: #50fa7b;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.terminal-search::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.terminal-line.hidden {
+    display: none;
+}
 
         /* 3D Character Window */
         .character-window {
@@ -1042,6 +1140,23 @@
                     </div>
                 </div>
                 <div class="real-world-label">Real World Self-Exploration</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="terminal-controls">
+        <div class="search-container">
+            <input 
+                type="text" 
+                id="terminalSearch" 
+                placeholder="Search prompts..."
+                class="terminal-search"
+            >
+            <div class="search-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
             </div>
         </div>
     </div>
