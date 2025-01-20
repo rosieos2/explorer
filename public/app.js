@@ -87,53 +87,37 @@ document.addEventListener('DOMContentLoaded', () => {
     function parseAnalysis(analysisText) {
         // Initialize sections structure
         const sections = {
-            metrics: [],
+            metrics: [
+                {
+                    value: 'Live',
+                    label: 'Updates'
+                },
+                {
+                    value: '24/7',
+                    label: 'Coverage'
+                },
+                {
+                    value: 'Now',
+                    label: 'Transfer Window'
+                }
+            ],
             details: []
         };
 
-        // Split analysis into paragraphs
-        const paragraphs = analysisText.split('\n\n').filter(p => p.trim());
+        // Clean up the text by removing asterisks and fixing line breaks
+        const cleanText = analysisText
+            .replace(/\*/g, '')  // Remove asterisks
+            .replace(/\s*\n\s*([a-z])/g, ' $1')  // Join broken sentences
+            .split(/\d+\.\s+/)   // Split by numbered points
+            .filter(text => text.trim());  // Remove empty items
 
-        // Extract metrics (numbers with labels)
-        const numberPattern = /(\d+(?:\.\d+)?)\s*(?:percent|%|\b)/g;
-        let metricsFound = 0;
-        paragraphs.forEach(para => {
-            const matches = para.match(numberPattern);
-            if (matches && metricsFound < 3) {
-                matches.forEach(match => {
-                    if (metricsFound < 3) {
-                        sections.metrics.push({
-                            value: match,
-                            label: para.split(match)[1]?.split('.')[0]?.trim() || 'Metric'
-                        });
-                        metricsFound++;
-                    }
-                });
+        // Create sections from the cleaned text
+        sections.details = [
+            {
+                title: 'Latest Transfer News',
+                content: cleanText.map(text => text.trim())
             }
-        });
-
-        // Process remaining content into sections
-        let currentSection = { title: 'Overview', content: [] };
-        
-        paragraphs.forEach(para => {
-            if (para.includes(':') && para.length < 50) {
-                // This looks like a section header
-                if (currentSection.content.length > 0) {
-                    sections.details.push(currentSection);
-                }
-                currentSection = {
-                    title: para.split(':')[0].trim(),
-                    content: [para.split(':')[1].trim()]
-                };
-            } else {
-                currentSection.content.push(para);
-            }
-        });
-        
-        // Add the last section
-        if (currentSection.content.length > 0) {
-            sections.details.push(currentSection);
-        }
+        ];
 
         return sections;
     }
