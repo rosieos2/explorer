@@ -1,4 +1,3 @@
-// app.js
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('agentForm');
     const loadingDiv = document.getElementById('loading');
@@ -12,8 +11,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function fetchRecentPrompts() {
         fetch('/api/prompts')
             .then(response => response.json())
-            .then(prompts => {
+            .then(data => {
                 terminalContent.innerHTML = '';
+                // Check if we have prompts and it's an array
+                const prompts = data.prompts || [];
+                
                 prompts.forEach(prompt => {
                     const timestamp = new Date(prompt.timestamp).toLocaleTimeString();
                     const line = createTerminalLine(prompt.prompt, timestamp);
