@@ -17,56 +17,96 @@ module.exports = async (req, res) => {
         const dom = new JSDOM(html);
         const document = dom.window.document;
 
-        // Extract useful content
-        const pageContent = {
-            title: document.title,
-            headings: Array.from(document.querySelectorAll('h1, h2, h3'))
-                .map(h => h.textContent.trim())
-                .filter(Boolean),
-            mainContent: Array.from(document.querySelectorAll('article, main, .content, p'))
-                .map(el => el.textContent.trim())
-                .filter(Boolean)
-                .join('\n')
-                .slice(0, 3000), // Limit content length
-            links: Array.from(document.querySelectorAll('a'))
-                .map(a => ({
-                    text: a.textContent.trim(),
-                    href: a.href
-                }))
-                .filter(link => link.text && link.href)
-                .slice(0, 20) // Limit number of links
-        };
+        // Extract page content
+        function extractContent() {
+            // Get main content areas
+            const mainContent = {
+                title: document.title,
+                meta: {
+                    description: document.querySelector('meta[name="description"]')?.content || '',
+                    keywords: document.querySelector('meta[name="keywords"]')?.content || ''
+                },
+                headings: [],
+                articles: [],
+                paragraphs: [],
+                lists: [],
+            };
+
+            // Get all headings
+            ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].forEach(tag => {
+                const headings = document.querySelectorAll(tag);
+                headings.forEach(h => {
+                    mainContent.headings.push({
+                        level: tag,
+                        text: h.textContent.trim()
+                    });
+                });
+            });
+
+            // Get article content
+            document.querySelectorAll('article, [role="article"], .article, .post, .content').forEach(article => {
+                const content = article.textContent.trim();
+                if (content) {
+                    mainContent.articles.push(content);
+                }
+            });
+
+            // Get paragraph content
+            document.querySelectorAll('p').forEach(p => {
+                const content = p.textContent.trim();
+                if (content) {
+                    mainContent.paragraphs.push(content);
+                }
+            });
+
+            // Get list content
+            document.querySelectorAll('ul, ol').forEach(list => {
+                const items = Array.from(list.querySelectorAll('li'))
+                    .map(li => li.textContent.trim())
+                    .filter(Boolean);
+                if (items.length) {
+                    mainContent.lists.push(items);
+                }
+            });
+
+            return mainContent;
+        }
+
+        const pageContent = extractContent();
+
+        // Format content for GPT
+        const formattedContent = `
+Page Title: ${pageContent.title}
+
+Meta Description: ${pageContent.meta.description}
+
+Main Headings:
+${pageContent.headings.map(h => `${h.level}: ${h.text}`).join('\n')}
+
+Main Content:
+${pageContent.articles.slice(0, 5).join('\n\n')}
+
+Additional Content:
+${pageContent.paragraphs.slice(0, 10).join('\n')}
+
+Key Lists:
+${pageContent.lists.map(list => list.join('\n- ')).join('\n\n')}`;
 
         // Initialize OpenAI
         const openai = new OpenAI({
             apiKey: process.env.OPENAI_API_KEY
         });
 
-        // Create a prompt based on the task
         const completion = await openai.chat.completions.create({
             model: "gpt-4",
             messages: [
                 { 
                     role: "system", 
-                    content: "You are a web analysis expert. Analyze the provided webpage content and complete the user's specific task. Be detailed but concise."
+                    content: "You are a web content analysis expert. Analyze the provided content and complete the user's specific task. Be thorough but concise."
                 },
                 { 
                     role: "user", 
-                    content: `
-                    Page Title: ${pageContent.title}
-                    
-                    Task: ${task}
-
-                    Main Content:
-                    ${pageContent.mainContent}
-
-                    Key Headings:
-                    ${pageContent.headings.join('\n')}
-
-                    Important Links:
-                    ${pageContent.links.map(l => `${l.text}: ${l.href}`).join('\n')}
-                    
-                    Please analyze this content and complete the requested task.`
+                    content: `Task: ${task}\n\nWebpage Content:\n${formattedContent.slice(0, 3000)}`
                 }
             ],
             max_tokens: 1000
@@ -78,7 +118,12 @@ module.exports = async (req, res) => {
                 analysis: completion.choices[0].message.content,
                 metadata: {
                     title: pageContent.title,
-                    url: url
+                    url: url,
+                    contentStats: {
+                        headings: pageContent.headings.length,
+                        articles: pageContent.articles.length,
+                        paragraphs: pageContent.paragraphs.length
+                    }
                 }
             }
         });
