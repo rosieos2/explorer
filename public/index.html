@@ -1712,6 +1712,14 @@
     background: #000000;
 }
 
+.code-block .keyword {
+    color: #FF8F40; /* Orange for keywords like import, const, from */
+}
+
+.code-block .string {
+    color: #FF5D5D; /* Red for strings */
+}
+
         .feature {
     display: flex;
     align-items: center;
@@ -2253,21 +2261,19 @@
         
         <div class="code-showcase">
             <pre class="code-block"><code>// Install the package
-npm install @mendable/oyster-js
-
-// Initialize the app
-import OysterApp from '@mendable/oyster-js';
-
-const app = new OysterApp({
-  apiKey: "YOUR_API_KEY"
-});
-
-// Scrape a website:
-const scrapeResult = await app.scrapeUrl('oyster.dev');
-
-if (scrapeResult.success) {
-  console.log(scrapeResult.markdown)
-}</code></pre>
+                npm install @rosie/web-agent
+                
+                // Initialize the agent
+                import WebAgent from '@rosie/web-agent';
+                
+                const agent = new WebAgent({ apiKey: "YOUR_API_KEY" });
+                
+                // Run a task:
+                const result = await agent.scrapeUrl('explorer.dev');
+                
+                if (result.success) {
+                  console.log(result.data)
+                }</code></pre>
         </div>
 
         <div class="feature-card centered">
