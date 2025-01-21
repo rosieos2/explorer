@@ -1,4 +1,25 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Check for first-time users
+    if (!localStorage.getItem('hasSeenTutorial')) {
+        showTutorial();
+    }
+
+    // Dark mode toggle
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    // Set initial theme
+    if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && prefersDark)) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+
+    darkModeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+    });
+
     const form = document.getElementById('agentForm');
     const loadingDiv = document.getElementById('loading');
     const errorDiv = document.getElementById('error');
@@ -27,6 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     terminalContent.appendChild(line);
                 });
+                
+                // Add typing animation to the latest prompt
+                if (prompts.length > 0) {
+                    const latestLine = terminalContent.lastElementChild;
+                    latestLine.querySelector('.terminal-command').classList.add('typing');
+                }
+
                 terminalContent.scrollTop = terminalContent.scrollHeight;
             })
             .catch(error => console.error('Error fetching prompts:', error));
@@ -82,7 +110,6 @@ document.addEventListener('DOMContentLoaded', () => {
         copyBtn.addEventListener('click', async (e) => {
             e.stopPropagation();
             
-            // Copy the content
             try {
                 await navigator.clipboard.writeText(content);
                 copyBtn.classList.add('copy-success');
@@ -107,10 +134,16 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Get task value
         const task = document.getElementById('task').value;
+        
+        // Add progress bar
+        const progressBar = document.createElement('div');
+        progressBar.className = 'progress-bar';
+        const progressFill = document.createElement('div');
+        progressFill.className = 'progress-bar-fill';
+        progressBar.appendChild(progressFill);
+        loadingDiv.appendChild(progressBar);
 
-        // Reset and show loading state
         loadingDiv.classList.add('active');
         submitBtn.disabled = true;
         errorDiv.classList.remove('active');
@@ -118,6 +151,14 @@ document.addEventListener('DOMContentLoaded', () => {
         resultDiv.innerHTML = '';
 
         try {
+            // Simulate progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 90) progress = 90;
+                progressFill.style.width = `${progress}%`;
+            }, 500);
+
             // Save prompt to database
             await fetch('/api/prompts', {
                 method: 'POST',
@@ -137,6 +178,9 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const data = await response.json();
+            
+            clearInterval(progressInterval);
+            progressFill.style.width = '100%';
             
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to process request');
@@ -177,12 +221,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 displayScreenshots(data.data.screenshots);
             }
 
+            // Update stats
+            updateStats();
+
         } catch (error) {
             errorDiv.textContent = `Error: ${error.message}`;
             errorDiv.classList.add('active');
         } finally {
             loadingDiv.classList.remove('active');
             submitBtn.disabled = false;
+            // Remove progress bar
+            progressBar.remove();
         }
     });
 
@@ -223,33 +272,100 @@ document.addEventListener('DOMContentLoaded', () => {
         screenshotsDiv.innerHTML = screenshotsHtml;
     }
 
-    function parseAnalysis(analysisText) {
-        const cleanText = analysisText
-            .split('\n')
-            .map(line => line.trim())
-            .filter(line => line.length > 0);
+    // Tutorial functions
+    function showTutorial() {
+        const modal = document.getElementById('tutorialModal');
+        modal.classList.add('active');
+        localStorage.setItem('hasSeenTutorial', 'true');
 
-        const formattedText = cleanText
-            .join('\n')
-            .split(/(?=\d+\.\s+)/g)
-            .map(text => text.trim())
-            .filter(text => text.length > 0);
-
-        return {
-            content: formattedText
-        };
+        document.getElementById('tutorialClose').addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
     }
 
-    function formatSectionContent(content) {
-        if (Array.isArray(content)) {
-            return content.map(item => {
-                const isNumberedPoint = /^\d+\.\s/.test(item);
-                const formattedItem = isNumberedPoint ? item : `• ${item}`;
-                return `<div class="data-item">
-                    <span class="data-value">${formattedItem}</span>
-                </div>`;
-            }).join('');
+    // Animate stats
+    function animateStats() {
+        const stats = document.querySelectorAll('.stat-value');
+        stats.forEach(stat => {
+            const target = parseInt(stat.textContent.replace(/,/g, ''));
+            let current = 0;
+            const increment = target / 100;
+            const duration = 1000; // 1 second
+            const steps = 100;
+            const step = duration / steps;
+
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    clearInterval(timer);
+                    current = target;
+                }
+                stat.textContent = Math.floor(current).toLocaleString();
+            }, step);
+        });
+    }
+
+    // Real-time stats updates
+    async function updateStats() {
+        try {
+            const response = await fetch('/api/stats');
+            const data = await response.json();
+            
+            const promptCount = document.getElementById('promptCount');
+            const activeUsers = document.getElementById('activeUsers');
+            const dataSize = document.getElementById('dataSize');
+
+            promptCount.textContent = data.totalPrompts.toLocaleString();
+            activeUsers.textContent = data.activeUsers.toLocaleString();
+            dataSize.textContent = formatDataSize(data.dataSize);
+
+            animateStats();
+        } catch (error) {
+            console.error('Failed to update stats:', error);
         }
-        return `<p>${content}</p>`;
+    }
+
+    function formatDataSize(bytes) {
+        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+        if (bytes === 0) return '0 B';
+        const i = Math.floor(Math.log(bytes) / Math.log(1024));
+        return `${(bytes / Math.pow(1024, i)).toFixed(1)} ${sizes[i]}`;
+    }
+
+    // Initialize stats and chart
+    updateStats();
+    setInterval(updateStats, 30000); // Update every 30 seconds
+    initializeChart();
+
+    // Usage chart initialization
+    function initializeChart() {
+        const ctx = document.getElementById('usageChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [], // Will be populated with dates
+                datasets: [{
+                    label: 'Daily Prompts',
+                    data: [], // Will be populated with counts
+                    borderColor: getComputedStyle(document.documentElement)
+                        .getPropertyValue('--accent-color'),
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
     }
 });
