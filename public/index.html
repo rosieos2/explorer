@@ -141,6 +141,8 @@
     max-width: 500px;
     margin: 0 auto;
     padding: 20px;
+    position: relative;
+    z-index: 2;
 }
 
 .form-group input {
@@ -167,31 +169,32 @@
     font-weight: 500;
     width: auto;
     margin: 0 auto;
-    display: block !important; /* Force display */
+    display: block;
     border: none;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    opacity: 1 !important; /* Force opacity */
-    visibility: visible !important; /* Force visibility */
-    position: relative;
-    z-index: 10; /* Ensure it's above other elements */
 }
 
 .form-group {
     margin-bottom: 24px;
 }
 
-.form-container textarea {
+.form-group textarea {
     width: 100%;
     min-height: 50px;
     padding: 12px;
-    border: 1px solid rgba(226, 232, 240, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 4px;
-    font-size: 1rem;
-    line-height: 1.5;
-    background: white;
+    font-size: 1.1rem;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    backdrop-filter: blur(5px);
     transition: all 0.2s ease;
     resize: none;
+}
+
+.form-group textarea::placeholder {
+    color: rgba(255, 255, 255, 0.8);
 }
 
 .form-container textarea:focus {
@@ -1135,9 +1138,9 @@
             text-align: center;
             padding: 20px;
             display: none;
-            color: var(--primary-color);
+            color: white;
         }
-
+        
         .loading.active {
             display: flex;
             align-items: center;
@@ -1167,15 +1170,16 @@
             margin-top: 16px;
             display: none;
         }
-
+        
         .error.active {
             display: block;
         }
-
+        
         #result {
             margin-top: 30px;
+            color: white;
         }
-
+        
         .screenshots {
             margin-top: 30px;
         }
@@ -1722,7 +1726,6 @@
     <!-- Main Content -->
     <div class="hero-section">
     <div class="hero-background">
-        <!-- Keep your existing video tag here -->
         <video autoplay loop muted playsinline>
             <source src="https://res.cloudinary.com/ddgjrttti/video/upload/v1737432751/AdobeStock_887589249_tbpcv7.mp4" type="video/mp4">
         </video>
@@ -1736,11 +1739,21 @@
         <div class="form-container">
             <form id="agentForm">
                 <div class="form-group">
-                    <input type="text" id="task" required 
-                           placeholder="task prompt:">
+                    <textarea id="task" required 
+                              placeholder="task prompt:"></textarea>
                 </div>
                 <button type="submit" id="submitBtn">Run Agent</button>
             </form>
+            
+            <div class="loading" id="loading">
+                Processing your request...
+            </div>
+
+            <div class="error" id="error"></div>
+
+            <div id="result"></div>
+            
+            <div class="screenshots" id="screenshots"></div>
         </div>
     </div>
 </div>
