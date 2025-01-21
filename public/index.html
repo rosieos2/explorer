@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Agent</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <style>
         :root {
             --primary-color: #2D3748;
@@ -1109,11 +1111,12 @@
             right: 40px;
             width: 300px;
             height: 300px;
-            background: white;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 16px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             z-index: 100;
+            backdrop-filter: blur(8px);
         }
 
         .stage-label {
@@ -2004,8 +2007,8 @@
 
     <!-- 3D Character Window -->
     <div class="character-window">
-        <canvas id="character-canvas"></canvas>
-    </div>
+    <canvas id="character-canvas"></canvas>
+</div>
 
     <!-- Main Content -->
     <div class="hero-section">
@@ -2311,32 +2314,69 @@ console.log(result);</code></pre>
     </footer>
 
     <script>
-        // Three.js setup for 3D character
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-        const canvas = document.getElementById('character-canvas');
-        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
-        renderer.setSize(300, 300);
+    // Three.js setup 
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    const canvas = document.getElementById('character-canvas');
+    const renderer = new THREE.WebGLRenderer({ 
+        canvas,
+        alpha: true,
+        antialias: true 
+    });
+    renderer.setSize(300, 300);
+    renderer.setClearColor(0x000000, 0);
 
-        // Create a simple cube as placeholder (you can replace with more complex 3D model)
-        const geometry = new THREE.BoxGeometry();
-        const material = new THREE.MeshBasicMaterial({ color: 0x4299E1 });
-        const cube = new THREE.Mesh(geometry, material);
-        scene.add(cube);
+    // Add lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
 
-        camera.position.z = 5;
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(0, 10, 10);
+    scene.add(directionalLight);
 
-        // Animation loop
-        function animate() {
-            requestAnimationFrame(animate);
-            cube.rotation.x += 0.01;
-            cube.rotation.y += 0.01;
-            renderer.render(scene, camera);
+    // Load the GLB model
+    const loader = new THREE.GLTFLoader();
+    let model;
+
+    loader.load(
+        'https://raw.githubusercontent.com/rosieos2/rosie/cb7df83c3169a5f6d673d0e84c8c5d9ecf3131ef/cartoon.glb',
+        (gltf) => {
+            model = gltf.scene;
+            model.scale.set(1, 1, 1); // Adjust scale if needed
+            model.position.y = -1; // Adjust position if needed
+            scene.add(model);
+        },
+        (progress) => {
+            console.log('Loading progress:', (progress.loaded / progress.total) * 100, '%');
+        },
+        (error) => {
+            console.error('Error loading model:', error);
         }
-        animate();
-    </script>
-    
-    <!-- Connect to your app.js file -->
-    <script src="app.js"></script>
+    );
+
+    camera.position.z = 3;
+
+    // Animation loop
+    function animate() {
+        requestAnimationFrame(animate);
+        
+        if (model) {
+            model.rotation.y += 0.01; // Gentle rotation
+        }
+        
+        renderer.render(scene, camera);
+    }
+
+    animate();
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+        camera.aspect = 1; // Keep aspect ratio square
+        camera.updateProjectionMatrix();
+    });
+</script>
+
+<!-- Connect to your app.js file -->
+<script src="app.js"></script>
 </body>
 </html>
