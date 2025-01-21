@@ -2325,36 +2325,22 @@ console.log(result);</code></pre>
         });
         renderer.setSize(300, 300);
         renderer.setClearColor(0x000000, 0);
-     
-        // Variables for smoke effect
+    
+        // Variables for fade effect
         let model;
         let mixer;
-        let smokeMesh;
         let characterOpacity = 1;
         let isDisappearing = false;
         let runAction;
-     
+    
         // Add lighting
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
-     
+    
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
         directionalLight.position.set(0, 5, 5);
         scene.add(directionalLight);
-     
-        // Add smoke texture and plane
-        const textureLoader = new THREE.TextureLoader();
-        const smokeTexture = textureLoader.load('https://cdn.prod.website-files.com/674396c59212c6ea348b24e0/678feba43c75df9433225719_5f4e2864fd90647ce90e0657c50c2645_w200.gif');
-        const smokeGeometry = new THREE.PlaneGeometry(3, 3);
-        const smokeMaterial = new THREE.MeshBasicMaterial({
-            map: smokeTexture,
-            transparent: true,
-            opacity: 0
-        });
-        smokeMesh = new THREE.Mesh(smokeGeometry, smokeMaterial);
-        smokeMesh.position.z = 0.5;
-        scene.add(smokeMesh);
-     
+    
         // Load the GLB model
         const loader = new THREE.GLTFLoader();
         loader.load(
@@ -2372,7 +2358,7 @@ console.log(result);</code></pre>
                 });
                 
                 scene.add(model);
-     
+    
                 mixer = new THREE.AnimationMixer(model);
                 const animations = gltf.animations;
                 const idleAction = animations.find(anim => anim.name === "Idle_Action");
@@ -2390,9 +2376,9 @@ console.log(result);</code></pre>
                 console.error('Error loading model:', error);
             }
         );
-     
+    
         camera.position.z = 1.5;
-     
+    
         function runBeforeDisappear() {
             return new Promise(resolve => {
                 if (runAction) {
@@ -2410,19 +2396,17 @@ console.log(result);</code></pre>
                 }
             });
         }
-     
+    
         function startDisappearingEffect() {
             isDisappearing = true;
             characterOpacity = 1;
-            smokeMaterial.opacity = 0;
         }
-     
+    
         function updateDisappearingEffect() {
             if (!isDisappearing) return;
             
             if (characterOpacity > 0) {
                 characterOpacity -= 0.02;
-                smokeMaterial.opacity = 1 - characterOpacity;
                 
                 if (model) {
                     model.traverse((node) => {
@@ -2436,7 +2420,7 @@ console.log(result);</code></pre>
                 model.visible = false;
             }
         }
-     
+    
         function reappearCharacter() {
             model.visible = true;
             isDisappearing = true;
@@ -2445,7 +2429,6 @@ console.log(result);</code></pre>
             const reappearInterval = setInterval(() => {
                 if (characterOpacity < 1) {
                     characterOpacity += 0.02;
-                    smokeMaterial.opacity = 1 - characterOpacity;
                     
                     model.traverse((node) => {
                         if (node.isMesh) {
@@ -2458,7 +2441,7 @@ console.log(result);</code></pre>
                 }
             }, 16);
         }
-     
+    
         // Animation loop with clock
         const clock = new THREE.Clock();
         
@@ -2473,15 +2456,15 @@ console.log(result);</code></pre>
             
             renderer.render(scene, camera);
         }
-     
+    
         animate();
-     
+    
         // Handle window resize
         window.addEventListener('resize', () => {
             camera.aspect = 1;
             camera.updateProjectionMatrix();
         });
-     
+    
         document.getElementById('agentForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             await runBeforeDisappear();
@@ -2495,7 +2478,7 @@ console.log(result);</code></pre>
             loadingElement.classList.add('active');
             errorElement.classList.remove('active');
             errorElement.textContent = '';
-     
+    
             try {
                 await new Promise(resolve => setTimeout(resolve, 2000));
                 resultsTerminal.classList.add('active');
@@ -2510,7 +2493,7 @@ console.log(result);</code></pre>
                 reappearCharacter();
             }
         });
-     </script>
+    </script>
 
 <!-- Connect to your app.js file -->
 <script src="app.js"></script>
