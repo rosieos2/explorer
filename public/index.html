@@ -118,8 +118,9 @@
 
 .hero-section {
     position: relative;
-    height: 90vh;
-    overflow: hidden;
+    min-height: 90vh; /* Change from fixed height to minimum height */
+    overflow: visible; /* Change from hidden to visible */
+    padding-bottom: 80px; /* Add padding to accommodate results */
 }
 
 .hero-section .hero h1 {
@@ -143,6 +144,7 @@
     padding: 20px;
     position: relative;
     z-index: 2;
+    margin-bottom: 80px; /* Add space at bottom to prevent overlap */
 }
 
 .form-group input {
@@ -186,8 +188,9 @@
     border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 4px;
     font-size: 1.1rem;
-    background: rgba(255, 255, 255, 0.15);
-    color: white;
+    background: rgba(0, 0, 0, 0.5); /* Darker background for better readability */
+    color: #50fa7b; /* Terminal-like green text */
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; /* Monospace font */
     backdrop-filter: blur(5px);
     transition: all 0.2s ease;
     resize: none;
@@ -1138,7 +1141,8 @@
             text-align: center;
             padding: 20px;
             display: none;
-            color: white;
+            color: #50fa7b; /* Match the terminal theme */
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
         }
         
         .loading.active {
@@ -1177,7 +1181,30 @@
         
         #result {
             margin-top: 30px;
-            color: white;
+            color: #8be9fd;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 16px;
+            border-radius: 4px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative; /* Ensure it stays above other content */
+            z-index: 3;
+        }
+
+        #result::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        #result::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        #result::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
         }
         
         .screenshots {
