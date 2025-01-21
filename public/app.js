@@ -32,6 +32,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeBtn = document.querySelector('.term-button.red');
 const minimizeBtn = document.querySelector('.term-button.yellow');
 
+if (resultsTerminal) {
+    const minimizeBtn = document.querySelector('.term-button.yellow');
+    const terminalTitle = document.querySelector('.terminal-title');
+
+    if (minimizeBtn) {
+        minimizeBtn.addEventListener('click', () => {
+            const terminalBody = resultsTerminal.querySelector('.terminal-body');
+            
+            if (isMinimized) {
+                // Restore
+                resultsTerminal.style.height = '';
+                terminalBody.style.display = 'block';
+                isMinimized = false;
+            } else {
+                // Minimize
+                resultsTerminal.style.height = '40px';
+                terminalBody.style.display = 'none';
+                isMinimized = true;
+            }
+        });
+    }
+
+    if (terminalTitle) {
+        terminalTitle.addEventListener('click', () => {
+            if (isMinimized) {
+                const terminalBody = resultsTerminal.querySelector('.terminal-body');
+                resultsTerminal.style.height = '';
+                terminalBody.style.display = 'block';
+                isMinimized = false;
+            }
+        });
+    }
+}
+
     if (closeBtn) {
         closeBtn.addEventListener('click', () => {
             resultsTerminal.style.display = 'none';
@@ -58,6 +92,7 @@ const minimizeBtn = document.querySelector('.term-button.yellow');
     let initialY;
     let xOffset = 0;
     let yOffset = 0;
+    let isMinimized = false;
     
     const dragStart = (e) => {
         if (e.type === "touchstart") {
@@ -272,19 +307,15 @@ const minimizeBtn = document.querySelector('.term-button.yellow');
             // Display sources if available
             if (data.data.sources && data.data.sources.length > 0) {
                 const sourcesHtml = `
-                    <div class="section sources-section">
-                        <div class="section-title">Sources Searched</div>
-                        <div class="sources-list">
-                            ${data.data.sources.map(source => `
-                                <div class="source-item">
-                                    <a href="${source}" target="_blank" rel="noopener noreferrer" class="source-url">
-                                        ${new URL(source).hostname}
-                                    </a>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `;
+    <div class="section sources-section">
+        <div class="section-title">Sources Searched</div>
+        <div class="sources-list">
+            ${data.data.sources.map(source => 
+                `<a href="${source}" target="_blank" rel="noopener noreferrer" class="source-url">${new URL(source).hostname}</a>`
+            ).join('\n')}
+        </div>
+    </div>
+`;
                 resultDiv.innerHTML = sourcesHtml + resultDiv.innerHTML;
             }
 
