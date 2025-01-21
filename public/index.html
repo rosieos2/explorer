@@ -1348,23 +1348,23 @@
         }
 
         .results-terminal {
-            margin-top: 20px;
-            background: rgba(0, 0, 0, 0.85);
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-height: 80vh;
-            width: 800px;
-            max-width: 90vw;
-            position: fixed;  /* Change back to fixed */
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);  /* Center it */
-            z-index: 1000;
-            display: none;
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-        }
+    margin-top: 20px;
+    background: rgba(0, 0, 0, 0.85);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-height: 80vh;
+    width: 800px;
+    max-width: 90vw;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    display: none;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
         
         .results-terminal.active {
             display: block;
@@ -1376,7 +1376,6 @@
             display: flex;
             align-items: center;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            cursor: move; /* Show it's draggable */
         }
         
         .terminal-buttons {
@@ -2466,33 +2465,39 @@ console.log(result);</code></pre>
         });
     
         document.getElementById('agentForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            await runBeforeDisappear();
-            startDisappearingEffect();
-            
-            const loadingElement = document.getElementById('loading');
-            const errorElement = document.getElementById('error');
-            const resultsTerminal = document.querySelector('.results-terminal');
-            const textarea = document.getElementById('task');
-            
-            loadingElement.classList.add('active');
-            errorElement.classList.remove('active');
-            errorElement.textContent = '';
+    e.preventDefault();
+    await runBeforeDisappear();
+    startDisappearingEffect();
     
-            try {
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                resultsTerminal.classList.add('active');
-                loadingElement.classList.remove('active');
-                reappearCharacter();
-                textarea.value = '';
-                
-            } catch (error) {
-                loadingElement.classList.remove('active');
-                errorElement.classList.add('active');
-                errorElement.textContent = 'An error occurred. Please try again.';
-                reappearCharacter();
-            }
-        });
+    const loadingElement = document.getElementById('loading');
+    const errorElement = document.getElementById('error');
+    const resultsTerminal = document.querySelector('.results-terminal');
+    const textarea = document.getElementById('task');
+    
+    loadingElement.classList.add('active');
+    errorElement.classList.remove('active');
+    errorElement.textContent = '';
+
+    try {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        resultsTerminal.classList.add('active');
+        loadingElement.classList.remove('active');
+        textarea.value = '';
+        
+        // Simple 5 second delay before character returns
+        setTimeout(() => {
+            reappearCharacter();
+        }, 5000);
+        
+    } catch (error) {
+        loadingElement.classList.remove('active');
+        errorElement.classList.add('active');
+        errorElement.textContent = 'An error occurred. Please try again.';
+        setTimeout(() => {
+            reappearCharacter();
+        }, 5000);
+    }
+});
     </script>
 
 <!-- Connect to your app.js file -->
