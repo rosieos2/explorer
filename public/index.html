@@ -206,6 +206,127 @@
     margin-bottom: 1.5rem;
 }
 
+.how-it-works {
+    padding: 4rem 0;
+    background: var(--background-color);
+}
+
+.how-it-works-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.step-card {
+    background: var(--card-background);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.step-card:hover {
+    transform: translateY(-5px);
+}
+
+.step-number {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 4rem;
+    font-weight: 800;
+    opacity: 0.1;
+    color: var(--accent-color);
+}
+
+.step-icon {
+    width: 48px;
+    height: 48px;
+    background: var(--accent-color);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.step-icon img {
+    width: 24px;
+    height: 24px;
+    filter: brightness(0) invert(1);
+}
+
+.step-content h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+.step-content p {
+    color: var(--text-color);
+    opacity: 0.8;
+    margin-bottom: 1.5rem;
+}
+
+.step-image {
+    margin-top: 1.5rem;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.step-image img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.step-features {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.step-feature {
+    background: var(--background-color);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    color: var(--text-color);
+}
+
+/* Animation for steps */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.step-card {
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.step-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.step-card:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.step-card:nth-child(4) {
+    animation-delay: 0.6s;
+}
+
 .tutorial-button {
     display: flex;
     align-items: center;
@@ -1523,81 +1644,82 @@
         <div class="container">
             <h2>How It Works</h2>
             
-            <div class="learning-evolution">
-                <div class="evolution-flow">
-                    <!-- GPT-4o Stage -->
-                    <div class="model-stage">
-                        <div class="gpt-logo">
-                            <img src="/api/placeholder/48/48" alt="GPT-4o">
+            <div class="how-it-works-grid">
+                <!-- Describe Step -->
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <div class="step-icon">
+                        <img src="/api/placeholder/24/24" alt="Describe icon" />
+                    </div>
+                    <div class="step-content">
+                        <h3>Describe Your Task</h3>
+                        <p>Simply tell us what you need in plain language. Our AI understands natural requests and converts them into actionable steps.</p>
+                        <div class="step-image">
+                            <img src="/api/placeholder/400/200" alt="Natural language input interface" />
                         </div>
-                        <span class="stage-label">GPT-4o</span>
-                    </div>
-    
-                    <span class="arrow-flow">→</span>
-    
-                    <!-- First Robot Stage -->
-                    <div class="robot-stage">
-                        <div class="robot-icon">🤖</div>
-                        <div class="stage-label">Imitation Learning</div>
-                        <div class="cycle-arrows">↑↓</div>
-                    </div>
-    
-                    <span class="arrow-flow">→</span>
-    
-                    <!-- Second Robot Stage -->
-                    <div class="robot-stage">
-                        <div class="robot-icon">🤖</div>
-                        <div class="stage-label">Self-Explore Learning</div>
-                        <div class="trajectory-tag">Multimodal Trajectories</div>
-                        <div class="cycle-arrows">↑↓</div>
-                    </div>
-    
-                    <span class="arrow-flow">→</span>
-    
-                    <!-- Final Robot Stage -->
-                    <div class="robot-stage">
-                        <div class="robot-icon">🤖</div>
-                        <div class="stage-label">Advanced Agent</div>
-                        <div class="cycle-arrows">↑↓</div>
-                    </div>
-                </div>
-            </div>
-    
-            <div class="real-world-section">
-                <div class="environment-grid">
-                    <!-- Web Environment -->
-                    <div class="web-environment">
-                        <h3>Real-World Web Environment</h3>
-                        <div class="platform-icons">
-                            <img src="/api/placeholder/48/48" alt="ESPN">
-                            <img src="/api/placeholder/48/48" alt="GitHub">
-                            <img src="/api/placeholder/48/48" alt="Amazon">
-                            <img src="/api/placeholder/48/48" alt="IMDb">
-                            <span>...</span>
-                        </div>
-                    </div>
-    
-                    <!-- Process Steps -->
-                    <div class="process-steps">
-                        <div>Observation</div>
-                        <div>Thought</div>
-                        <div>Action</div>
-                    </div>
-    
-                    <!-- Screenshot Section -->
-                    <div class="screenshot-section">
-                        <h3>Screenshot & Accessibility Tree</h3>
-                        <img src="/api/placeholder/400/200" alt="Website Screenshot" class="screenshot">
-                        <div class="accessibility-tree">
-                            [1] RootWebArea 'Website'
-                            [2] link 'Skip to main content'
-                            [3] navigation 'navigation'
-                            [4] link 'Amazon'
-                            ...
+                        <div class="step-features">
+                            <span class="step-feature">Natural Language</span>
+                            <span class="step-feature">Task Analysis</span>
                         </div>
                     </div>
                 </div>
-                <div class="real-world-label">Real World Self-Exploration</div>
+    
+                <!-- Explore Step -->
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <div class="step-icon">
+                        <img src="/api/placeholder/24/24" alt="Explore icon" />
+                    </div>
+                    <div class="step-content">
+                        <h3>Smart Exploration</h3>
+                        <p>Our agent intelligently navigates the web, finding and processing relevant information from multiple sources.</p>
+                        <div class="step-image">
+                            <img src="/api/placeholder/400/200" alt="Web exploration visualization" />
+                        </div>
+                        <div class="step-features">
+                            <span class="step-feature">Multi-source</span>
+                            <span class="step-feature">Intelligent Search</span>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Analyze Step -->
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <div class="step-icon">
+                        <img src="/api/placeholder/24/24" alt="Analyze icon" />
+                    </div>
+                    <div class="step-content">
+                        <h3>Deep Analysis</h3>
+                        <p>Advanced AI processes and understands content, including text, images, and data structures.</p>
+                        <div class="step-image">
+                            <img src="/api/placeholder/400/200" alt="AI analysis visualization" />
+                        </div>
+                        <div class="step-features">
+                            <span class="step-feature">ML Processing</span>
+                            <span class="step-feature">Data Extraction</span>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Deliver Step -->
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <div class="step-icon">
+                        <img src="/api/placeholder/24/24" alt="Deliver icon" />
+                    </div>
+                    <div class="step-content">
+                        <h3>Comprehensive Results</h3>
+                        <p>Get organized, actionable results that combine information from multiple sources into a clear format.</p>
+                        <div class="step-image">
+                            <img src="/api/placeholder/400/200" alt="Results dashboard" />
+                        </div>
+                        <div class="step-features">
+                            <span class="step-feature">Structured Data</span>
+                            <span class="step-feature">Clear Insights</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
