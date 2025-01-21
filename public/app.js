@@ -33,9 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
 const minimizeBtn = document.querySelector('.term-button.yellow');
 
 if (resultsTerminal) {
-    const minimizeBtn = document.querySelector('.term-button.yellow');
-    const terminalTitle = document.querySelector('.terminal-title');
-
+    const minimizeBtn = document.querySelector('.term-button.minimize');
+    
     if (minimizeBtn) {
         minimizeBtn.addEventListener('click', () => {
             const terminalBody = resultsTerminal.querySelector('.terminal-body');
@@ -53,36 +52,7 @@ if (resultsTerminal) {
             }
         });
     }
-
-    if (terminalTitle) {
-        terminalTitle.addEventListener('click', () => {
-            if (isMinimized) {
-                const terminalBody = resultsTerminal.querySelector('.terminal-body');
-                resultsTerminal.style.height = '';
-                terminalBody.style.display = 'block';
-                isMinimized = false;
-            }
-        });
-    }
 }
-
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            resultsTerminal.style.display = 'none';
-        });
-    }
-    
-    if (minimizeBtn) {
-        minimizeBtn.addEventListener('click', () => {
-            if (resultsTerminal.style.height === '40px') {
-                resultsTerminal.style.height = '';
-                resultsTerminal.querySelector('.terminal-body').style.display = 'block';
-            } else {
-                resultsTerminal.style.height = '40px';
-                resultsTerminal.querySelector('.terminal-body').style.display = 'none';
-            }
-        });
-    }
     
     // Make the terminal draggable
     let isDragging = false;
