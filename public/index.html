@@ -2314,67 +2314,62 @@ console.log(result);</code></pre>
     </footer>
 
     <script>
-    // Three.js setup 
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-    const canvas = document.getElementById('character-canvas');
-    const renderer = new THREE.WebGLRenderer({ 
-        canvas,
-        alpha: true,
-        antialias: true 
-    });
-    renderer.setSize(300, 300);
-    renderer.setClearColor(0x000000, 0);
-
-    // Add lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-    scene.add(ambientLight);
-
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    directionalLight.position.set(0, 10, 10);
-    scene.add(directionalLight);
-
-    // Load the GLB model
-    const loader = new THREE.GLTFLoader();
-    let model;
-
-    loader.load(
-        'https://raw.githubusercontent.com/rosieos2/rosie/cb7df83c3169a5f6d673d0e84c8c5d9ecf3131ef/cartoon.glb',
-        (gltf) => {
-            model = gltf.scene;
-            model.scale.set(1, 1, 1); // Adjust scale if needed
-            model.position.y = -1; // Adjust position if needed
-            scene.add(model);
-        },
-        (progress) => {
-            console.log('Loading progress:', (progress.loaded / progress.total) * 100, '%');
-        },
-        (error) => {
-            console.error('Error loading model:', error);
+        // Three.js setup 
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+        const canvas = document.getElementById('character-canvas');
+        const renderer = new THREE.WebGLRenderer({ 
+            canvas,
+            alpha: true,
+            antialias: true 
+        });
+        renderer.setSize(300, 300);
+        renderer.setClearColor(0x000000, 0);
+    
+        // Add lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); // Increased brightness
+        scene.add(ambientLight);
+    
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+        directionalLight.position.set(0, 5, 5); // Adjusted light position
+        scene.add(directionalLight);
+    
+        // Load the GLB model
+        const loader = new THREE.GLTFLoader();
+        let model;
+    
+        loader.load(
+            'https://raw.githubusercontent.com/rosieos2/rosie/cb7df83c3169a5f6d673d0e84c8c5d9ecf3131ef/cartoon.glb',
+            (gltf) => {
+                model = gltf.scene;
+                model.scale.set(2, 2, 2); // Made model bigger
+                model.position.set(0, -0.5, 0); // Adjusted position: x, y, z
+                scene.add(model);
+            },
+            (progress) => {
+                console.log('Loading progress:', (progress.loaded / progress.total) * 100, '%');
+            },
+            (error) => {
+                console.error('Error loading model:', error);
+            }
+        );
+    
+        camera.position.z = 2; // Brought camera closer
+    
+        // Animation loop without rotation
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
         }
-    );
-
-    camera.position.z = 3;
-
-    // Animation loop
-    function animate() {
-        requestAnimationFrame(animate);
-        
-        if (model) {
-            model.rotation.y += 0.01; // Gentle rotation
-        }
-        
-        renderer.render(scene, camera);
-    }
-
-    animate();
-
-    // Handle window resize
-    window.addEventListener('resize', () => {
-        camera.aspect = 1; // Keep aspect ratio square
-        camera.updateProjectionMatrix();
-    });
-</script>
+    
+        animate();
+    
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = 1;
+            camera.updateProjectionMatrix();
+        });
+    </script>
 
 <!-- Connect to your app.js file -->
 <script src="app.js"></script>
