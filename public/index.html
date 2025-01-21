@@ -146,16 +146,16 @@
 .form-group input {
     width: 100%;
     padding: 0.75rem 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Slightly more visible border */
     border-radius: 4px;
-    font-size: 1rem;
-    background: rgba(255, 255, 255, 0.1);
+    font-size: 1.1rem; /* Slightly larger font */
+    background: rgba(255, 255, 255, 0.15); /* Slightly more visible background */
     color: white;
     backdrop-filter: blur(5px);
 }
 
 .form-group input::placeholder {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.8); /* More visible placeholder text */
 }
 
 #submitBtn {
@@ -1050,11 +1050,11 @@
 
         .hero p {
             font-size: 1.25rem;
-            color: rgba(255, 255, 255, 0.9);
+            color: white; /* Make it fully white instead of semi-transparent */
             max-width: 450px;
             margin: 0 auto;
             line-height: 1.5;
-            text-shadow: none;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Add shadow for better visibility */
         }
 
         /* Footer Styles */
@@ -1751,7 +1751,7 @@
                     <input type="text" id="task" required 
                            placeholder="task prompt:">
                 </div>
-                <button type="submit" id="submitBtn">Run task</button>
+                <button type="submit" id="submitBtn">Run Agent</button>
             </form>
         </div>
     </div>
