@@ -43,6 +43,25 @@
     --border-color: #4A5568;
 }
 
+[data-theme="dark"] .navbar,
+[data-theme="dark"] .footer,
+[data-theme="dark"] .how-it-works {
+    background: #2D3748;
+}
+
+[data-theme="dark"] .form-container,
+[data-theme="dark"] .evolution-flow,
+[data-theme="dark"] .web-environment,
+[data-theme="dark"] .screenshot-section {
+    background: #1A202C;
+    border-color: #4A5568;
+}
+
+[data-theme="dark"] .process-steps {
+    background: #4A5568;
+    color: #E2E8F0;
+}
+
 /* Progress Bar */
 .progress-bar {
     width: 100%;
@@ -88,6 +107,30 @@
 
 .terminal-line:hover {
     background-color: rgba(255, 255, 255, 0.1);
+}
+
+.terminal-search-container {
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+}
+
+.search-container {
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+}
+
+.terminal-search {
+    width: 100%;
+    padding: 12px 16px;
+    padding-left: 40px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
 }
 
 .typing {
@@ -1189,26 +1232,25 @@
                 <a href="#">Features</a>
                 <a href="#">Documentation</a>
                 <a href="#">Contact</a>
+                <button id="darkModeToggle" class="dark-mode-toggle">
+                    <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
             </div>
         </div>
     </nav>
-
-    <button id="darkModeToggle" class="dark-mode-toggle">
-        <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-        </svg>
-        <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-        </svg>
-    </button>
     
     <!-- First-time Tutorial Modal -->
     <div id="tutorialModal" class="tutorial-modal">
@@ -1358,23 +1400,6 @@
         </div>
     </div>
 
-    <div class="terminal-controls">
-        <div class="search-container">
-            <input 
-                type="text" 
-                id="terminalSearch" 
-                placeholder="Search prompts..."
-                class="terminal-search"
-            >
-            <div class="search-icon">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-            </div>
-        </div>
-    </div>
-
     <!-- Terminal Section -->
     <div class="terminal-section">
         <div class="terminal-container">
@@ -1394,6 +1419,24 @@
                 </div>
             </div>
     
+            <!-- Search bar moved below terminal window -->
+            <div class="terminal-search-container">
+                <div class="search-container">
+                    <div class="search-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </div>
+                    <input 
+                        type="text" 
+                        id="terminalSearch" 
+                        placeholder="Search prompts..."
+                        class="terminal-search"
+                    >
+                </div>
+            </div>
+    
             <div class="stats-bar">
                 <div class="stat-item">
                     <div class="stat-value" id="promptCount">147,382</div>
@@ -1408,14 +1451,9 @@
                     <div class="stat-label">Dataset Size</div>
                 </div>
             </div>
-    
-            <!-- Add chart canvas -->
-            <div class="usage-chart">
-                <canvas id="usageChart"></canvas>
-            </div>
         </div>
     </div>
-
+    
     <!-- Integration Section -->
     <div class="integration-section">
         <div class="container">
@@ -1541,6 +1579,5 @@ console.log(result);</code></pre>
     
     <!-- Connect to your app.js file -->
     <script src="app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
