@@ -396,8 +396,8 @@ if (resultsTerminal && minimizeBtn) {
             if (!response.ok) {
                 // Use default values if API is not available
                 const defaultStats = {
-                    totalPrompts: 147382,
-                    activeUsers: 1293,
+                    totalPrompts: 1504,
+                    activeUsers: 104,
                     dataSize: 3000000000 // 3GB in bytes
                 };
                 updateStatsDisplay(defaultStats);
