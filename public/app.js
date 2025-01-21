@@ -21,37 +21,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     const form = document.getElementById('agentForm');
-    const loadingDiv = document.getElementById('loading');
-    const errorDiv = document.getElementById('error');
-    const submitBtn = document.getElementById('submitBtn');
-    const resultDiv = document.getElementById('result');
-    const screenshotsDiv = document.getElementById('screenshots');
-    const terminalContent = document.getElementById('terminalContent');
-    const searchInput = document.getElementById('terminalSearch');
-    const resultsTerminal = document.querySelector('.results-terminal'); // Added this line
-    const closeBtn = document.querySelector('.term-button.red');
-const minimizeBtn = document.querySelector('.term-button.yellow');
+const loadingDiv = document.getElementById('loading');
+const errorDiv = document.getElementById('error');
+const submitBtn = document.getElementById('submitBtn');
+const resultDiv = document.getElementById('result');
+const screenshotsDiv = document.getElementById('screenshots');
+const terminalContent = document.getElementById('terminalContent');
+const searchInput = document.getElementById('terminalSearch');
+const resultsTerminal = document.querySelector('.results-terminal');
+const minimizeBtn = document.querySelector('.minimize-btn');
 
-if (resultsTerminal) {
-    const minimizeBtn = document.querySelector('.term-button.minimize');
-    
-    if (minimizeBtn) {
-        minimizeBtn.addEventListener('click', () => {
-            const terminalBody = resultsTerminal.querySelector('.terminal-body');
-            
-            if (isMinimized) {
-                // Restore
-                resultsTerminal.style.height = '';
-                terminalBody.style.display = 'block';
-                isMinimized = false;
-            } else {
-                // Minimize
-                resultsTerminal.style.height = '40px';
-                terminalBody.style.display = 'none';
-                isMinimized = true;
-            }
-        });
-    }
+if (resultsTerminal && minimizeBtn) {
+    minimizeBtn.addEventListener('click', () => {
+        const terminalBody = resultsTerminal.querySelector('.terminal-body');
+        const minimizeIcon = minimizeBtn.querySelector('.minimize-icon');
+        const restoreIcon = minimizeBtn.querySelector('.restore-icon');
+        
+        if (isMinimized) {
+            // Restore
+            resultsTerminal.style.height = '';
+            terminalBody.style.display = 'block';
+            minimizeIcon.style.display = 'inline';
+            restoreIcon.style.display = 'none';
+            isMinimized = false;
+        } else {
+            // Minimize
+            resultsTerminal.style.height = '40px';
+            terminalBody.style.display = 'none';
+            minimizeIcon.style.display = 'none';
+            restoreIcon.style.display = 'inline';
+            isMinimized = true;
+        }
+    });
 }
     
     // Make the terminal draggable
