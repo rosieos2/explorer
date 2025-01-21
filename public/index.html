@@ -2327,24 +2327,33 @@ console.log(result);</code></pre>
         renderer.setClearColor(0x000000, 0);
     
         // Add lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8); // Increased brightness
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
     
         const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(0, 5, 5); // Adjusted light position
+        directionalLight.position.set(0, 5, 5);
         scene.add(directionalLight);
     
         // Load the GLB model
         const loader = new THREE.GLTFLoader();
-        let model;
+        let mixer; // Add animation mixer
     
         loader.load(
             'https://raw.githubusercontent.com/rosieos2/rosie/cb7df83c3169a5f6d673d0e84c8c5d9ecf3131ef/cartoon.glb',
             (gltf) => {
                 model = gltf.scene;
-                model.scale.set(2, 2, 2); // Made model bigger
-                model.position.set(0, -0.5, 0); // Adjusted position: x, y, z
+                model.scale.set(2.5, 2.5, 2.5);
+                model.position.set(0, -1.2, 0);
                 scene.add(model);
+    
+                // Setup animation
+                mixer = new THREE.AnimationMixer(model);
+                const animations = gltf.animations;
+                const idleAction = animations.find(anim => anim.name === "Idle_Action");
+                if (idleAction) {
+                    const action = mixer.clipAction(idleAction);
+                    action.play();
+                }
             },
             (progress) => {
                 console.log('Loading progress:', (progress.loaded / progress.total) * 100, '%');
@@ -2354,11 +2363,19 @@ console.log(result);</code></pre>
             }
         );
     
-        camera.position.z = 2; // Brought camera closer
+        camera.position.z = 1.5;
     
-        // Animation loop without rotation
+        // Animation loop with clock for animation timing
+        const clock = new THREE.Clock();
+        
         function animate() {
             requestAnimationFrame(animate);
+            
+            // Update animation mixer
+            if (mixer) {
+                mixer.update(clock.getDelta());
+            }
+            
             renderer.render(scene, camera);
         }
     
