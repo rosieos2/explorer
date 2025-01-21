@@ -207,18 +207,19 @@
 }
 
 .tutorial-button {
-    background: var(--accent-color);
-    color: white;
-    border: none;
-    padding: 0.8rem 1.5rem;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: auto;
+    margin: 2rem auto 0;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    transition: transform 0.2s ease;
 }
 
 .tutorial-button:hover {
-    background: #3182CE;
+    transform: translateX(5px);
 }
 
 /* Dark Mode Toggle */
@@ -1185,6 +1186,131 @@
             font-size: 0.9rem;
         }
 
+        .feature {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: var(--card-background);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.tutorial-modal .tutorial-content {
+    background: var(--card-background);
+    padding: 3rem;
+    border-radius: 24px;
+    max-width: 800px;
+    width: 90%;
+}
+
+.tutorial-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.welcome-emoji {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    animation: wave 1s infinite;
+}
+
+.tutorial-header h2 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--accent-color), #9F7AEA);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.tutorial-header .subtitle {
+    font-size: 1.2rem;
+    color: var(--muted-text);
+}
+
+.tutorial-step {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2rem;
+    border-radius: 16px;
+    margin-bottom: 2rem;
+    border: 1px solid var(--border-color);
+}
+
+.step-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.process-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.process-card {
+    background: var(--card-background);
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    position: relative;
+    border: 1px solid var(--border-color);
+    transition: transform 0.2s ease;
+}
+
+.process-card:hover {
+    transform: translateY(-5px);
+}
+
+.card-number {
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    background: var(--accent-color);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+}
+
+.card-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
+
+.features-grid .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.tutorial-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: auto;
+    margin: 2rem auto 0;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    transition: transform 0.2s ease;
+}
+
+.tutorial-button:hover {
+    transform: translateX(5px);
+}
+
+@keyframes wave {
+    0%, 100% { transform: rotate(0deg); }
+    25% { transform: rotate(-10deg); }
+    75% { transform: rotate(10deg); }
+}
+
         .feature-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -1200,15 +1326,8 @@
         }
 
         .feature-icon {
-            background: var(--accent-color);
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 24px;
-        }
+    font-size: 1.5rem;
+}
 
         .feature-icon svg {
             color: white;
@@ -1270,33 +1389,82 @@
         </div>
     </nav>
     
-    <!-- First-time Tutorial Modal -->
     <div id="tutorialModal" class="tutorial-modal">
         <div class="tutorial-content">
-            <h2>Welcome to Web Agent! 👋</h2>
+            <div class="tutorial-header">
+                <div class="welcome-emoji">👋</div>
+                <h2>Welcome to Web Agent</h2>
+                <p class="subtitle">The future of web automation is here</p>
+            </div>
+    
             <div class="tutorial-steps">
                 <div class="tutorial-step">
-                    <h3>End-to-End Web Agent</h3>
-                    <p>Using Large Multimodal Models, our agent can understand and interact with web content just like a human would.</p>
+                    <div class="step-icon">🧠</div>
+                    <div class="step-content">
+                        <h3>End-to-End Web Agent</h3>
+                        <p>Using state-of-the-art Large Multimodal Models, our agent brings human-like understanding to web interactions.</p>
+                    </div>
                 </div>
-                <div class="tutorial-step">
+    
+                <div class="tutorial-step process-flow">
                     <h3>How it Works</h3>
-                    <p>1. Describe your task naturally</p>
-                    <p>2. Agent explores relevant websites</p>
-                    <p>3. Analyzes content using AI</p>
-                    <p>4. Returns comprehensive results</p>
+                    <div class="process-cards">
+                        <div class="process-card">
+                            <div class="card-number">1</div>
+                            <div class="card-icon">💭</div>
+                            <h4>Describe</h4>
+                            <p>Tell us what you need in plain language</p>
+                        </div>
+                        <div class="process-card">
+                            <div class="card-number">2</div>
+                            <div class="card-icon">🔍</div>
+                            <h4>Explore</h4>
+                            <p>Agent searches relevant websites</p>
+                        </div>
+                        <div class="process-card">
+                            <div class="card-number">3</div>
+                            <div class="card-icon">⚡</div>
+                            <h4>Analyze</h4>
+                            <p>AI processes the content</p>
+                        </div>
+                        <div class="process-card">
+                            <div class="card-number">4</div>
+                            <div class="card-icon">✨</div>
+                            <h4>Deliver</h4>
+                            <p>Get comprehensive results</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="tutorial-step">
+    
+                <div class="tutorial-step features-grid">
                     <h3>Key Features</h3>
-                    <ul>
-                        <li>Natural language understanding</li>
-                        <li>Visual content analysis</li>
-                        <li>Real-time web exploration</li>
-                        <li>Intelligent data synthesis</li>
-                    </ul>
+                    <div class="features">
+                        <div class="feature">
+                            <span class="feature-icon">🎯</span>
+                            <span class="feature-text">Natural language understanding</span>
+                        </div>
+                        <div class="feature">
+                            <span class="feature-icon">👁️</span>
+                            <span class="feature-text">Visual content analysis</span>
+                        </div>
+                        <div class="feature">
+                            <span class="feature-icon">🌐</span>
+                            <span class="feature-text">Real-time web exploration</span>
+                        </div>
+                        <div class="feature">
+                            <span class="feature-icon">🧪</span>
+                            <span class="feature-text">Intelligent data synthesis</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <button id="tutorialClose" class="tutorial-button">Got it, let's start!</button>
+    
+            <button id="tutorialClose" class="tutorial-button">
+                <span>Let's get started</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+            </button>
         </div>
     </div>
 
