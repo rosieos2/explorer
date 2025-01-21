@@ -24,6 +24,173 @@
     position: relative;
 }
 
+/* Dark mode variables */
+:root {
+    --primary-color: #2D3748;
+    --accent-color: #4299E1;
+    --background-color: #F7FAFC;
+    --text-color: #1A202C;
+    --card-background: #ffffff;
+    --border-color: #E2E8F0;
+}
+
+[data-theme="dark"] {
+    --primary-color: #E2E8F0;
+    --accent-color: #63B3ED;
+    --background-color: #1A202C;
+    --text-color: #F7FAFC;
+    --card-background: #2D3748;
+    --border-color: #4A5568;
+}
+
+/* Progress Bar */
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--border-color);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: var(--accent-color);
+    width: 0;
+    transition: width 0.3s ease;
+}
+
+/* Loading Animation */
+@keyframes loading {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border-color);
+    border-top-color: var(--accent-color);
+    border-radius: 50%;
+    animation: loading 1s linear infinite;
+}
+
+/* Terminal typing animation */
+@keyframes typing {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.terminal-line {
+    transition: background-color 0.2s ease;
+}
+
+.terminal-line:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.typing {
+    position: relative;
+}
+
+.typing::after {
+    content: '▋';
+    position: absolute;
+    right: -10px;
+    animation: typing 0.8s infinite;
+}
+
+/* Stats Animation */
+@keyframes countUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.stat-value {
+    animation: countUp 1s ease-out;
+}
+
+/* Tutorial Modal */
+.tutorial-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.tutorial-modal.active {
+    display: flex;
+    opacity: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+.tutorial-content {
+    background: var(--card-background);
+    padding: 2rem;
+    border-radius: 12px;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.tutorial-step {
+    margin-bottom: 1.5rem;
+}
+
+.tutorial-button {
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background 0.3s ease;
+}
+
+.tutorial-button:hover {
+    background: #3182CE;
+}
+
+/* Dark Mode Toggle */
+.dark-mode-toggle {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background-color 0.3s ease;
+}
+
+.dark-mode-toggle:hover {
+    background-color: var(--border-color);
+}
+
+[data-theme="dark"] .sun-icon {
+    display: none;
+}
+
+[data-theme="light"] .moon-icon {
+    display: none;
+}
+
+/* Usage Chart */
+.usage-chart {
+    background: var(--card-background);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 2rem;
+}
+
 .evolution-step {
     display: flex;
     align-items: center;
@@ -1026,6 +1193,53 @@
         </div>
     </nav>
 
+    <button id="darkModeToggle" class="dark-mode-toggle">
+        <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+        </svg>
+        <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+    </button>
+    
+    <!-- First-time Tutorial Modal -->
+    <div id="tutorialModal" class="tutorial-modal">
+        <div class="tutorial-content">
+            <h2>Welcome to Web Agent! 👋</h2>
+            <div class="tutorial-steps">
+                <div class="tutorial-step">
+                    <h3>End-to-End Web Agent</h3>
+                    <p>Using Large Multimodal Models, our agent can understand and interact with web content just like a human would.</p>
+                </div>
+                <div class="tutorial-step">
+                    <h3>How it Works</h3>
+                    <p>1. Describe your task naturally</p>
+                    <p>2. Agent explores relevant websites</p>
+                    <p>3. Analyzes content using AI</p>
+                    <p>4. Returns comprehensive results</p>
+                </div>
+                <div class="tutorial-step">
+                    <h3>Key Features</h3>
+                    <ul>
+                        <li>Natural language understanding</li>
+                        <li>Visual content analysis</li>
+                        <li>Real-time web exploration</li>
+                        <li>Intelligent data synthesis</li>
+                    </ul>
+                </div>
+            </div>
+            <button id="tutorialClose" class="tutorial-button">Got it, let's start!</button>
+        </div>
+    </div>
+
     <!-- 3D Character Window -->
     <div class="character-window">
         <canvas id="character-canvas"></canvas>
@@ -1162,40 +1376,45 @@
     </div>
 
     <!-- Terminal Section -->
-<div class="terminal-section">
-    <div class="terminal-container">
-        <div class="terminal-header">
-            <h2>Building Our Dataset</h2>
-            <p>Watch our AI learn from real-world interactions in real-time</p>
-        </div>
-        
-        <div class="terminal-window">
-            <div class="terminal-titlebar">
-                <div class="terminal-button terminal-close"></div>
-                <div class="terminal-button terminal-minimize"></div>
-                <div class="terminal-button terminal-zoom"></div>
+    <div class="terminal-section">
+        <div class="terminal-container">
+            <div class="terminal-header">
+                <h2>Building Our Dataset</h2>
+                <p>Watch our AI learn from real-world interactions in real-time</p>
             </div>
-            <div class="terminal-content" id="terminalContent">
-                <!-- Terminal content will be dynamically populated -->
+            
+            <div class="terminal-window">
+                <div class="terminal-titlebar">
+                    <div class="terminal-button terminal-close"></div>
+                    <div class="terminal-button terminal-minimize"></div>
+                    <div class="terminal-button terminal-zoom"></div>
+                </div>
+                <div class="terminal-content" id="terminalContent">
+                    <!-- Terminal content will be dynamically populated -->
+                </div>
             </div>
-        </div>
-
-        <div class="stats-bar">
-            <div class="stat-item">
-                <div class="stat-value" id="promptCount">147,382</div>
-                <div class="stat-label">Prompts Collected</div>
+    
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-value" id="promptCount">147,382</div>
+                    <div class="stat-label">Prompts Collected</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="activeUsers">1,293</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="dataSize">2.8TB</div>
+                    <div class="stat-label">Dataset Size</div>
+                </div>
             </div>
-            <div class="stat-item">
-                <div class="stat-value" id="activeUsers">1,293</div>
-                <div class="stat-label">Active Users</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="dataSize">2.8TB</div>
-                <div class="stat-label">Dataset Size</div>
+    
+            <!-- Add chart canvas -->
+            <div class="usage-chart">
+                <canvas id="usageChart"></canvas>
             </div>
         </div>
     </div>
-</div>
 
     <!-- Integration Section -->
     <div class="integration-section">
@@ -1322,5 +1541,6 @@ console.log(result);</code></pre>
     
     <!-- Connect to your app.js file -->
     <script src="app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
