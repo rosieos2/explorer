@@ -118,9 +118,30 @@
 
 .hero-section {
     position: relative;
-    min-height: 90vh; /* Change from fixed height to minimum height */
-    overflow: visible; /* Change from hidden to visible */
-    padding-bottom: 80px; /* Add padding to accommodate results */
+    min-height: 100vh;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+.hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.hero-background video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
 }
 
 .hero-section .hero h1 {
@@ -144,7 +165,6 @@
     padding: 20px;
     position: relative;
     z-index: 2;
-    margin-bottom: 80px; /* Add space at bottom to prevent overlap */
 }
 
 .form-group input {
@@ -1019,10 +1039,9 @@
 
         /* Main Content Styles */
         .container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-            flex: 1;
+            position: relative;
+            z-index: 2;
+            padding: 40px 20px;
         }
 
         .hero {
@@ -1216,13 +1235,13 @@
         }
 
         .results-terminal {
-            display: none;
             margin-top: 20px;
             background: rgba(0, 0, 0, 0.85);
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             max-height: 500px;
+            display: none;
         }
         
         .results-terminal.active {
@@ -1822,32 +1841,33 @@
         </div>
             
         <div class="form-container">
-    <form id="agentForm">
-        <div class="form-group">
-            <textarea id="task" required placeholder="task prompt:"></textarea>
-        </div>
-        <button type="submit" id="submitBtn">Run Agent</button>
-    </form>
-    
-    <div class="loading" id="loading">
-        Processing your request...
-    </div>
-
-    <div class="error" id="error"></div>
-
-    <!-- New terminal-style results container -->
-    <div class="results-terminal">
-        <div class="terminal-header-bar">
-            <div class="terminal-buttons">
-                <span class="term-button red"></span>
-                <span class="term-button yellow"></span>
-                <span class="term-button green"></span>
+            <form id="agentForm">
+                <div class="form-group">
+                    <textarea id="task" required placeholder="task prompt:"></textarea>
+                </div>
+                <button type="submit" id="submitBtn">Run Agent</button>
+            </form>
+            
+            <div class="loading" id="loading">
+                Processing your request...
             </div>
-            <span class="terminal-title">Results</span>
-        </div>
-        <div class="terminal-body">
-            <div id="result"></div>
-            <div id="screenshots"></div>
+
+            <div class="error" id="error"></div>
+
+            <div class="results-terminal">
+                <div class="terminal-header-bar">
+                    <div class="terminal-buttons">
+                        <span class="term-button red"></span>
+                        <span class="term-button yellow"></span>
+                        <span class="term-button green"></span>
+                    </div>
+                    <span class="terminal-title">Results</span>
+                </div>
+                <div class="terminal-body">
+                    <div id="result"></div>
+                    <div id="screenshots"></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
