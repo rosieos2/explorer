@@ -326,9 +326,8 @@ if (resultsTerminal && minimizeBtn) {
             .map(line => {
                 const trimmed = line.trim();
                 if (!trimmed) return '';
-                const isNumberedPoint = /^\d+\.\s/.test(trimmed);
                 return `<div class="data-item">
-                    <span class="data-value">${isNumberedPoint ? trimmed : '• ' + trimmed}</span>
+                    <span class="data-value">${trimmed.startsWith('-') ? trimmed : '• ' + trimmed}</span>
                 </div>`;
             })
             .filter(Boolean)
