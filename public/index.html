@@ -349,6 +349,25 @@
     animation: countUp 1s ease-out;
 }
 
+.environment-image {
+    margin-top: 1.5rem;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.environment-image img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 12px;
+    transition: transform 0.3s ease;
+}
+
+.environment-image:hover img {
+    transform: scale(1.02);
+}
+
 /* Tutorial Modal */
 .tutorial-modal {
     display: none;
@@ -2114,32 +2133,22 @@
     
                 <!-- Environment Integration -->
                 <div class="component-card" style="margin-top: 2rem;">
-                    <div class="component-header">
-                        <div class="component-icon">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <line x1="2" y1="12" x2="22" y2="12"></line>
-                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                            </svg>
-                        </div>
-                        <h3 class="component-title">Online Environment Integration</h3>
-                    </div>
-                    <p>Seamlessly interacts with real-world websites through a robust online browsing environment</p>
-                    <div class="input-output">
-                        <div class="io-box">
-                            <div class="io-title">Supported Platforms</div>
-                            <span class="tech-tag">E-commerce</span>
-                            <span class="tech-tag">Social Media</span>
-                            <span class="tech-tag">News Sites</span>
-                            <span class="tech-tag">Search Engines</span>
-                        </div>
-                        <div class="io-box">
-                            <div class="io-title">Technologies</div>
-                            <span class="tech-tag">Selenium</span>
-                            <span class="tech-tag">DOM Manipulation</span>
-                            <span class="tech-tag">Network Handling</span>
-                        </div>
-                    </div>
+    <div class="component-header">
+        <div class="component-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+        </div>
+        <h3 class="component-title">Online Environment Integration</h3>
+    </div>
+    <p>Seamlessly interacts with real-world websites through a robust online browsing environment</p>
+    
+    <div class="environment-image">
+        <img src="/api/placeholder/800/300" alt="Web Environment Integration" />
+    </div>
+</div>
                 </div>
             </div>
         </div>
