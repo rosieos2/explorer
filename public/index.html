@@ -1621,12 +1621,12 @@
 
         /* Integration Section */
         .integration-section {
-            background: linear-gradient(180deg, #1A202C 0%, #0D1117 100%);
-            padding: 80px 0;
-            color: white;
-            position: relative;
-            z-index: 2;
-        }
+    background: linear-gradient(180deg, #1A202C 0%, #0D1117 100%);
+    padding: 80px 0;
+    color: white;
+    position: relative;
+    z-index: 2;
+}
         
         .integration-section::before {
             content: '';
@@ -1639,26 +1639,29 @@
         }
 
         .integration-section h2 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 16px;
-            color: white;
-        }
+    font-size: 2.5rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 16px;
+    color: white;
+}
 
-        .integration-subtitle {
-            text-align: center;
-            color: #A0AEC0;
-            margin-bottom: 48px;
-            font-size: 1.2rem;
-        }
+.integration-subtitle {
+    text-align: center;
+    color: #A0AEC0;
+    margin-bottom: 48px;
+    font-size: 1.2rem;
+}
 
-        .code-showcase {
-            background: #1A202C;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-bottom: 48px;
-        }
+.code-showcase {
+    background: #1A202C;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 48px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
 
         .code-tabs {
             display: flex;
@@ -1700,13 +1703,13 @@
         }
 
         .code-block {
-            padding: 24px;
-            margin: 0;
-            color: #E2E8F0;
-            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-            line-height: 1.5;
-            font-size: 0.9rem;
-        }
+    padding: 24px;
+    margin: 0;
+    color: #E2E8F0;
+    font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
 
         .feature {
     display: flex;
@@ -1717,6 +1720,32 @@
     background: var(--card-background);
     border-radius: 12px;
     border: 1px solid var(--border-color);
+}
+
+.feature-card.centered {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 32px;
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    max-width: 500px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.feature-card.centered .feature-icon {
+    margin: 0 auto 20px;
+}
+
+.feature-card.centered h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: white;
+}
+
+.feature-card.centered p {
+    color: #A0AEC0;
+    margin-bottom: 24px;
 }
 
 .tutorial-modal .tutorial-content {
@@ -1882,13 +1911,13 @@
         }
 
         .feature-link {
-            color: var(--accent-color);
-            text-decoration: none;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
+    color: var(--accent-color);
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
 
         .feature-link:hover {
             text-decoration: underline;
@@ -2215,69 +2244,46 @@
         </div>
     </div>
     
-    <!-- Integration Section -->
-    <div class="integration-section">
-        <div class="container">
-            <h2>Integrate today</h2>
-            <p class="integration-subtitle">Enhance your applications with powerful AI agent capabilities.</p>
-            
-            <div class="code-showcase">
-                <div class="code-tabs">
-                    <button class="tab-btn active">JavaScript</button>
-                    <button class="tab-btn">Python</button>
-                    <button class="tab-btn">curl</button>
-                    <button class="copy-btn">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                        </svg>
-                    </button>
-                </div>
-                <pre class="code-block"><code>// Install the package
-npm install web-agent
+<!-- Integration Section -->
+<div class="integration-section">
+    <div class="container">
+        <h2>Integrate today</h2>
+        <p class="integration-subtitle">Enhance your applications with top-tier web scraping and crawling capabilities.</p>
+        
+        <div class="code-showcase">
+            <pre class="code-block"><code>// Install the package
+npm install @mendable/oyster-js
 
-// Initialize the agent
-import { WebAgent } from 'web-agent';
+// Initialize the app
+import OysterApp from '@mendable/oyster-js';
 
-const agent = new WebAgent({
+const app = new OysterApp({
   apiKey: "YOUR_API_KEY"
 });
 
-// Run a task
-const result = await agent.run({
-  task: "Describe what you want the agent to do"
-});
+// Scrape a website:
+const scrapeResult = await app.scrapeUrl('oyster.dev');
 
-console.log(result);</code></pre>
-            </div>
+if (scrapeResult.success) {
+  console.log(scrapeResult.markdown)
+}</code></pre>
+        </div>
 
-            <div class="feature-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 7h-9"></path>
-                            <path d="M14 17H5"></path>
-                            <circle cx="17" cy="17" r="3"></circle>
-                            <circle cx="7" cy="7" r="3"></circle>
-                        </svg>
-                    </div>
-                    <h3>Open Source</h3>
-                    <p>Fork, contribute, and customize to your needs. Join our community of developers.</p>
-                    <a href="https://github.com/yourusername/web-agent" class="feature-link">View on GitHub →</a>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2v20"></path>
-                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-                        </svg>
-                    </div>
-                    <h3>Free to Start</h3>
-                    <p>Begin with our free tier and scale as your needs grow. No credit card required.</p>
-                </div>
+        <div class="feature-card centered">
+            <div class="feature-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 7h-9"></path>
+                    <path d="M14 17H5"></path>
+                    <circle cx="17" cy="17" r="3"></circle>
+                    <circle cx="7" cy="7" r="3"></circle>
+                </svg>
             </div>
+            <h3>Open Source</h3>
+            <p>Fork, contribute, and customize to your needs. Join our community of developers.</p>
+            <a href="https://github.com/yourusername/oyster" class="feature-link">View on GitHub →</a>
         </div>
     </div>
+</div>
 
     <!-- Footer -->
     <footer class="footer">
