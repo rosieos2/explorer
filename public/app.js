@@ -13,13 +13,18 @@ document.addEventListener('DOMContentLoaded', () => {
         fetch('/api/prompts')
             .then(response => response.json())
             .then(data => {
+                const searchTerm = searchInput.value.toLowerCase();
                 terminalContent.innerHTML = '';
-                // Check if we have prompts and it's an array
-                const prompts = data.prompts || [];
                 
+                const prompts = data.prompts || [];
                 prompts.forEach(prompt => {
-                    const timestamp = new Date(prompt.timestamp).toLocaleTimeString();
-                    const line = createTerminalLine(prompt.prompt, timestamp);
+                    const line = createTerminalLine(prompt.prompt, prompt.timestamp);
+                    
+                    // Apply current search filter
+                    if (searchTerm && !prompt.prompt.toLowerCase().includes(searchTerm)) {
+                        line.classList.add('hidden');
+                    }
+                    
                     terminalContent.appendChild(line);
                 });
                 terminalContent.scrollTop = terminalContent.scrollHeight;
