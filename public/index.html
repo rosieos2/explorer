@@ -842,6 +842,37 @@
     opacity: 1;
 }
 
+.minimize-btn {
+    background: none;
+    border: none;
+    color: #A0AEC0;
+    cursor: pointer;
+    padding: 4px 8px;
+    font-size: 16px;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+.minimize-btn:hover {
+    color: #fff;
+}
+
+.results-terminal.minimized {
+    height: 40px;
+}
+
+.results-terminal.minimized .terminal-body {
+    display: none;
+}
+
+.results-terminal.minimized .minimize-icon {
+    display: none;
+}
+
+.results-terminal.minimized .restore-icon {
+    display: inline !important;
+}
+
 .terminal-copy-btn:hover {
     color: #50fa7b;
     transform: translateY(-50%) scale(1.1);
@@ -1928,19 +1959,20 @@
             <div class="error" id="error"></div>
 
             <div class="results-terminal">
-            <div class="terminal-header-bar">
-            <span class="terminal-title">Results</span>
-            <div class="terminal-buttons">
-                <span class="term-button minimize"></span>
-            </div>
+    <div class="terminal-header-bar">
+        <span class="terminal-title">Results</span>
+        <div class="terminal-buttons">
+            <button class="minimize-btn">
+                <span class="minimize-icon">−</span>
+                <span class="restore-icon" style="display: none;">□</span>
+            </button>
         </div>
-                    <span class="terminal-title">Results</span>
-                </div>
-                <div class="terminal-body">
-                    <div id="result"></div>
-                    <div id="screenshots"></div>
-                </div>
-            </div>
+    </div>
+    <div class="terminal-body">
+        <div id="result"></div>
+        <div id="screenshots"></div>
+    </div>
+</div>
         </div>
     </div>
 </div>
