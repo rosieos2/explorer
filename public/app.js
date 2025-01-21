@@ -28,6 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const screenshotsDiv = document.getElementById('screenshots');
     const terminalContent = document.getElementById('terminalContent');
     const searchInput = document.getElementById('terminalSearch');
+    const resultsTerminal = document.querySelector('.results-terminal'); // Added this line
 
     // Initialize terminal update
     function fetchRecentPrompts() {
@@ -185,6 +186,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to process request');
             }
+
+            // Show the results terminal
+            resultsTerminal.classList.add('active'); // Added this line
 
             // Display sources if available
             if (data.data.sources && data.data.sources.length > 0) {
