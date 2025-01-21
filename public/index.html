@@ -1269,8 +1269,22 @@
         .terminal-buttons {
             display: flex;
             gap: 6px;
+            margin-left: auto;
             margin-right: 16px;
-        }        
+        }  
+        
+        .term-button.minimize {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ffbd2e;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .term-button.minimize:hover {
+            background: #ffd480;
+        }
         
         .term-button {
             width: 12px;
@@ -1914,12 +1928,12 @@
             <div class="error" id="error"></div>
 
             <div class="results-terminal">
-                <div class="terminal-header-bar">
-                    <div class="terminal-buttons">
-                        <span class="term-button red"></span>
-                        <span class="term-button yellow"></span>
-                        <span class="term-button green"></span>
-                    </div>
+            <div class="terminal-header-bar">
+            <span class="terminal-title">Results</span>
+            <div class="terminal-buttons">
+                <span class="term-button minimize"></span>
+            </div>
+        </div>
                     <span class="terminal-title">Results</span>
                 </div>
                 <div class="terminal-body">
