@@ -41,12 +41,30 @@
     --text-color: #F7FAFC;
     --card-background: #2D3748;
     --border-color: #4A5568;
+    --muted-text: #A0AEC0;  /* Add this for footer and secondary text */
 }
+
 
 [data-theme="dark"] .navbar,
 [data-theme="dark"] .footer,
 [data-theme="dark"] .how-it-works {
     background: #2D3748;
+}
+
+[data-theme="dark"] .footer-links a,
+[data-theme="dark"] .footer-bottom,
+[data-theme="dark"] .stage-label,
+[data-theme="dark"] .hero p {
+    color: var(--muted-text);
+}
+
+[data-theme="dark"] .process-steps > div {
+    color: var(--text-color);
+}
+
+/* Stage labels and text */
+[data-theme="dark"] .stage-label {
+    color: var(--text-color);
 }
 
 [data-theme="dark"] .form-container,
