@@ -138,11 +138,40 @@
 
 .form-container {
     background: transparent;
-    max-width: 800px;
+    max-width: 500px;
     margin: 0 auto;
     padding: 20px;
-    position: relative;
-    z-index: 2;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    backdrop-filter: blur(5px);
+}
+
+.form-group input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+#submitBtn {
+    background: #1a1a1a;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    border: none;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+}
+
+#submitBtn:hover {
+    background: #333;
 }
 
 .form-group {
@@ -1009,17 +1038,23 @@
 
         .hero h1 {
             font-size: 3.5rem;
-            font-weight: 800;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            line-height: 1.2;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+        }
+
+        .accent-text {
+            color: #FF6B00;
         }
 
         .hero p {
             font-size: 1.25rem;
-            color: #4A5568;
-            max-width: 600px;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 450px;
             margin: 0 auto;
+            line-height: 1.5;
+            text-shadow: none;
         }
 
         /* Footer Styles */
@@ -1699,38 +1734,28 @@
     <!-- Main Content -->
     <div class="hero-section">
     <div class="hero-background">
+        <!-- Keep your existing video tag here -->
         <video autoplay loop muted playsinline>
             <source src="https://res.cloudinary.com/ddgjrttti/video/upload/v1737432751/AdobeStock_887589249_tbpcv7.mp4" type="video/mp4">
         </video>
     </div>
     <div class="container">
         <div class="hero">
-            <h1>Web Agent</h1>
-            <p>Automate your web tasks with our powerful agent. Just describe what you need.</p>
+            <h1>Turn websites into<br><span class="accent-text">LLM-ready</span> data</h1>
+            <p>Power your AI apps with clean data crawled from any website. It's also open-source.</p>
         </div>
             
-            <div class="form-container">
-                <form id="agentForm">
-                    <div class="form-group">
-                        <label for="task">Task Description</label>
-                        <textarea id="task" required 
-                                  placeholder="Describe what you want the agent to do"></textarea>
-                    </div>
-                    <button type="submit" id="submitBtn">Run Agent</button>
-                </form>
-                
-                <div class="loading" id="loading">
-                    Processing your request...
+        <div class="form-container">
+            <form id="agentForm">
+                <div class="form-group">
+                    <input type="text" id="task" required 
+                           placeholder="task prompt:">
                 </div>
-    
-                <div class="error" id="error"></div>
-    
-                <div id="result"></div>
-                
-                <div class="screenshots" id="screenshots"></div>
-            </div>
+                <button type="submit" id="submitBtn">Run task</button>
+            </form>
         </div>
     </div>
+</div>
 
     <!-- How It Works Section -->
     <div class="how-it-works">
