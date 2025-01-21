@@ -2326,6 +2326,13 @@ console.log(result);</code></pre>
         renderer.setSize(300, 300);
         renderer.setClearColor(0x000000, 0);
     
+        // Variables for smoke effect
+        let model;
+        let mixer;
+        let smokeMesh;
+        let characterOpacity = 1;
+        let isDisappearing = false;
+    
         // Add lighting
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
@@ -2334,19 +2341,37 @@ console.log(result);</code></pre>
         directionalLight.position.set(0, 5, 5);
         scene.add(directionalLight);
     
+        // Add smoke texture and plane
+        const textureLoader = new THREE.TextureLoader();
+        const smokeTexture = textureLoader.load('https://cdn.prod.website-files.com/674396c59212c6ea348b24e0/678feba43c75df9433225719_5f4e2864fd90647ce90e0657c50c2645_w200.gif');
+        const smokeGeometry = new THREE.PlaneGeometry(3, 3);
+        const smokeMaterial = new THREE.MeshBasicMaterial({
+            map: smokeTexture,
+            transparent: true,
+            opacity: 0
+        });
+        smokeMesh = new THREE.Mesh(smokeGeometry, smokeMaterial);
+        smokeMesh.position.z = 0.5;
+        scene.add(smokeMesh);
+    
         // Load the GLB model
         const loader = new THREE.GLTFLoader();
-        let mixer; // Add animation mixer
-    
         loader.load(
             'https://raw.githubusercontent.com/rosieos2/rosie/cb7df83c3169a5f6d673d0e84c8c5d9ecf3131ef/cartoon.glb',
             (gltf) => {
                 model = gltf.scene;
                 model.scale.set(2.5, 2.5, 2.5);
                 model.position.set(0, -3.5, 0);
+                
+                // Make model transparent
+                model.traverse((node) => {
+                    if (node.isMesh) {
+                        node.material.transparent = true;
+                    }
+                });
+                
                 scene.add(model);
     
-                // Setup animation
                 mixer = new THREE.AnimationMixer(model);
                 const animations = gltf.animations;
                 const idleAction = animations.find(anim => anim.name === "Idle_Action");
@@ -2365,16 +2390,65 @@ console.log(result);</code></pre>
     
         camera.position.z = 1.5;
     
-        // Animation loop with clock for animation timing
+        function startDisappearingEffect() {
+            isDisappearing = true;
+            characterOpacity = 1;
+            smokeMaterial.opacity = 0;
+        }
+    
+        function updateDisappearingEffect() {
+            if (!isDisappearing) return;
+            
+            if (characterOpacity > 0) {
+                characterOpacity -= 0.02;
+                smokeMaterial.opacity = 1 - characterOpacity;
+                
+                if (model) {
+                    model.traverse((node) => {
+                        if (node.isMesh) {
+                            node.material.opacity = characterOpacity;
+                        }
+                    });
+                }
+            } else {
+                isDisappearing = false;
+                model.visible = false;
+            }
+        }
+    
+        function reappearCharacter() {
+            model.visible = true;
+            isDisappearing = true;
+            characterOpacity = 0;
+            
+            const reappearInterval = setInterval(() => {
+                if (characterOpacity < 1) {
+                    characterOpacity += 0.02;
+                    smokeMaterial.opacity = 1 - characterOpacity;
+                    
+                    model.traverse((node) => {
+                        if (node.isMesh) {
+                            node.material.opacity = characterOpacity;
+                        }
+                    });
+                } else {
+                    clearInterval(reappearInterval);
+                    isDisappearing = false;
+                }
+            }, 16);
+        }
+    
+        // Animation loop with clock
         const clock = new THREE.Clock();
         
         function animate() {
             requestAnimationFrame(animate);
             
-            // Update animation mixer
             if (mixer) {
                 mixer.update(clock.getDelta());
             }
+            
+            updateDisappearingEffect();
             
             renderer.render(scene, camera);
         }
@@ -2385,6 +2459,34 @@ console.log(result);</code></pre>
         window.addEventListener('resize', () => {
             camera.aspect = 1;
             camera.updateProjectionMatrix();
+        });
+    
+        document.getElementById('agentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            startDisappearingEffect();
+            
+            const loadingElement = document.getElementById('loading');
+            const errorElement = document.getElementById('error');
+            const resultsTerminal = document.querySelector('.results-terminal');
+            const textarea = document.getElementById('task');
+            
+            loadingElement.classList.add('active');
+            errorElement.classList.remove('active');
+            errorElement.textContent = '';
+    
+            try {
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                resultsTerminal.classList.add('active');
+                loadingElement.classList.remove('active');
+                reappearCharacter();
+                textarea.value = '';
+                
+            } catch (error) {
+                loadingElement.classList.remove('active');
+                errorElement.classList.add('active');
+                errorElement.textContent = 'An error occurred. Please try again.';
+                reappearCharacter();
+            }
         });
     </script>
 
