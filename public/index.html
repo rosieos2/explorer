@@ -1180,18 +1180,26 @@
         }
         
         #result {
-            margin-top: 30px;
             color: #8be9fd;
             font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 16px;
-            border-radius: 4px;
-            max-height: 400px;
-            overflow-y: auto;
+            font-size: 0.9rem;
+            line-height: 1.5;
             white-space: pre-wrap;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            position: relative; /* Ensure it stays above other content */
-            z-index: 3;
+            margin: 0;
+            padding: 0;
+        }
+
+        .terminal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .terminal-body::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .terminal-body::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
         }
 
         #result::-webkit-scrollbar {
@@ -1205,6 +1213,56 @@
         #result::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.2);
             border-radius: 4px;
+        }
+
+        .results-terminal {
+            display: none;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-height: 500px;
+        }
+        
+        .results-terminal.active {
+            display: block;
+        }
+        
+        .terminal-header-bar {
+            background: #2d2d2d;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .terminal-buttons {
+            display: flex;
+            gap: 6px;
+            margin-right: 16px;
+        }
+        
+        .term-button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        
+        .term-button.red { background: #ff5f56; }
+        .term-button.yellow { background: #ffbd2e; }
+        .term-button.green { background: #27c93f; }
+        
+        .terminal-title {
+            color: #fff;
+            font-size: 0.9rem;
+            font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+        }
+        
+        .terminal-body {
+            padding: 16px;
+            max-height: 400px;
+            overflow-y: auto;
         }
         
         .screenshots {
@@ -1764,23 +1822,32 @@
         </div>
             
         <div class="form-container">
-            <form id="agentForm">
-                <div class="form-group">
-                    <textarea id="task" required 
-                              placeholder="task prompt:"></textarea>
-                </div>
-                <button type="submit" id="submitBtn">Run Agent</button>
-            </form>
-            
-            <div class="loading" id="loading">
-                Processing your request...
+    <form id="agentForm">
+        <div class="form-group">
+            <textarea id="task" required placeholder="task prompt:"></textarea>
+        </div>
+        <button type="submit" id="submitBtn">Run Agent</button>
+    </form>
+    
+    <div class="loading" id="loading">
+        Processing your request...
+    </div>
+
+    <div class="error" id="error"></div>
+
+    <!-- New terminal-style results container -->
+    <div class="results-terminal">
+        <div class="terminal-header-bar">
+            <div class="terminal-buttons">
+                <span class="term-button red"></span>
+                <span class="term-button yellow"></span>
+                <span class="term-button green"></span>
             </div>
-
-            <div class="error" id="error"></div>
-
+            <span class="terminal-title">Results</span>
+        </div>
+        <div class="terminal-body">
             <div id="result"></div>
-            
-            <div class="screenshots" id="screenshots"></div>
+            <div id="screenshots"></div>
         </div>
     </div>
 </div>
