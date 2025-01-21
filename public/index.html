@@ -1249,6 +1249,8 @@
             transform: translate(-50%, -50%);
             z-index: 1000;
             display: none;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
         
         .results-terminal.active {
@@ -1283,8 +1285,34 @@
         
         .terminal-title {
             color: #fff;
+            cursor: pointer;
             font-size: 0.9rem;
             font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+        }
+
+        .terminal-title:hover {
+            opacity: 0.8;
+        }
+        
+        .sources-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .source-url {
+            color: #fff !important;
+            text-decoration: none !important;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .source-url:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #50fa7b !important;
         }
         
         .terminal-body {
