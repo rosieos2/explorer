@@ -29,6 +29,85 @@ document.addEventListener('DOMContentLoaded', () => {
     const terminalContent = document.getElementById('terminalContent');
     const searchInput = document.getElementById('terminalSearch');
     const resultsTerminal = document.querySelector('.results-terminal'); // Added this line
+    const closeBtn = document.querySelector('.term-button.red');
+const minimizeBtn = document.querySelector('.term-button.yellow');
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            resultsTerminal.style.display = 'none';
+        });
+    }
+    
+    if (minimizeBtn) {
+        minimizeBtn.addEventListener('click', () => {
+            if (resultsTerminal.style.height === '40px') {
+                resultsTerminal.style.height = '';
+                resultsTerminal.querySelector('.terminal-body').style.display = 'block';
+            } else {
+                resultsTerminal.style.height = '40px';
+                resultsTerminal.querySelector('.terminal-body').style.display = 'none';
+            }
+        });
+    }
+    
+    // Make the terminal draggable
+    let isDragging = false;
+    let currentX;
+    let currentY;
+    let initialX;
+    let initialY;
+    let xOffset = 0;
+    let yOffset = 0;
+    
+    const dragStart = (e) => {
+        if (e.type === "touchstart") {
+            initialX = e.touches[0].clientX - xOffset;
+            initialY = e.touches[0].clientY - yOffset;
+        } else {
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
+        }
+    
+        if (e.target.classList.contains('terminal-header-bar')) {
+            isDragging = true;
+        }
+    };
+    
+    const drag = (e) => {
+        if (isDragging) {
+            e.preventDefault();
+    
+            if (e.type === "touchmove") {
+                currentX = e.touches[0].clientX - initialX;
+                currentY = e.touches[0].clientY - initialY;
+            } else {
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+            }
+    
+            xOffset = currentX;
+            yOffset = currentY;
+    
+            setTranslate(currentX, currentY, resultsTerminal);
+        }
+    };
+    
+    const dragEnd = () => {
+        isDragging = false;
+    };
+    
+    const setTranslate = (xPos, yPos, el) => {
+        el.style.transform = `translate(${xPos}px, ${yPos}px)`;
+    };
+    
+    if (resultsTerminal) {
+        resultsTerminal.addEventListener('touchstart', dragStart, false);
+        resultsTerminal.addEventListener('touchend', dragEnd, false);
+        resultsTerminal.addEventListener('touchmove', drag, false);
+        resultsTerminal.addEventListener('mousedown', dragStart, false);
+        resultsTerminal.addEventListener('mouseup', dragEnd, false);
+        resultsTerminal.addEventListener('mousemove', drag, false);
+    }
 
     // Initialize terminal update
     function fetchRecentPrompts() {
