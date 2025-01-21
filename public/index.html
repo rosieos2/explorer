@@ -211,120 +211,116 @@
     background: var(--background-color);
 }
 
-.how-it-works-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
+.agent-workflow {
     margin-top: 3rem;
-}
-
-.step-card {
+    position: relative;
     background: var(--card-background);
     border-radius: 16px;
     padding: 2rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    border: 1px solid var(--border-color);
-    transition: transform 0.3s ease;
-    position: relative;
-    overflow: hidden;
 }
 
-.step-card:hover {
-    transform: translateY(-5px);
+.workflow-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-top: 2rem;
 }
 
-.step-number {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    font-size: 4rem;
-    font-weight: 800;
-    opacity: 0.1;
-    color: var(--accent-color);
-}
-
-.step-icon {
-    width: 48px;
-    height: 48px;
-    background: var(--accent-color);
+.component-card {
+    background: var(--background-color);
     border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--border-color);
+}
+
+.component-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.component-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--accent-color);
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 1.5rem;
 }
 
-.step-icon img {
-    width: 24px;
-    height: 24px;
-    filter: brightness(0) invert(1);
+.component-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-color);
 }
 
-.step-content h3 {
+.data-flow {
+    position: relative;
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.flow-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent-color);
     font-size: 1.5rem;
-    margin-bottom: 1rem;
-    color: var(--text-color);
 }
 
-.step-content p {
-    color: var(--text-color);
-    opacity: 0.8;
-    margin-bottom: 1.5rem;
+.flow-arrow.right {
+    right: -1.5rem;
 }
 
-.step-image {
-    margin-top: 1.5rem;
+.flow-arrow.left {
+    left: -1.5rem;
+}
+
+.input-output {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.io-box {
+    background: rgba(0, 0, 0, 0.03);
     border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 1rem;
 }
 
-.step-image img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-}
-
-.step-features {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.step-feature {
-    background: var(--background-color);
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
+.io-title {
     font-size: 0.875rem;
     color: var(--text-color);
+    opacity: 0.7;
+    margin-bottom: 0.5rem;
 }
 
-/* Animation for steps */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.tech-tag {
+    display: inline-block;
+    background: var(--accent-color);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
 }
 
-.step-card {
-    animation: fadeInUp 0.5s ease forwards;
+.screenshot-box {
+    margin-top: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
 }
 
-.step-card:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.step-card:nth-child(3) {
-    animation-delay: 0.4s;
-}
-
-.step-card:nth-child(4) {
-    animation-delay: 0.6s;
+.screenshot-box img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
 }
 
 .tutorial-button {
@@ -1644,79 +1640,109 @@
         <div class="container">
             <h2>How It Works</h2>
             
-            <div class="how-it-works-grid">
-                <!-- Describe Step -->
-                <div class="step-card">
-                    <div class="step-number">1</div>
-                    <div class="step-icon">
-                        <img src="/api/placeholder/24/24" alt="Describe icon" />
-                    </div>
-                    <div class="step-content">
-                        <h3>Describe Your Task</h3>
-                        <p>Simply tell us what you need in plain language. Our AI understands natural requests and converts them into actionable steps.</p>
-                        <div class="step-image">
-                            <img src="/api/placeholder/400/200" alt="Natural language input interface" />
+            <div class="agent-workflow">
+                <div class="workflow-grid">
+                    <!-- Multimodal Observation -->
+                    <div class="component-card">
+                        <div class="component-header">
+                            <div class="component-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                    <path d="M20.4 15a9 9 0 1 1-16.8 0"></path>
+                                </svg>
+                            </div>
+                            <h3 class="component-title">Multimodal Observation</h3>
                         </div>
-                        <div class="step-features">
-                            <span class="step-feature">Natural Language</span>
-                            <span class="step-feature">Task Analysis</span>
+                        <p>Integrates visual and textual information from web pages using advanced LMM capabilities</p>
+                        <div class="input-output">
+                            <div class="io-box">
+                                <div class="io-title">Inputs</div>
+                                <span class="tech-tag">Screenshots</span>
+                                <span class="tech-tag">DOM Elements</span>
+                                <span class="tech-tag">HTML Structure</span>
+                            </div>
+                        </div>
+                        <div class="screenshot-box">
+                            <img src="/api/placeholder/400/150" alt="Visual observation demo" />
+                        </div>
+                    </div>
+    
+                    <!-- Reasoning Engine -->
+                    <div class="component-card">
+                        <div class="component-header">
+                            <div class="component-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                    <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="component-title">Reasoning Engine</h3>
+                        </div>
+                        <p>Processes observations and plans actions using generalist planning approach</p>
+                        <div class="input-output">
+                            <div class="io-box">
+                                <div class="io-title">Capabilities</div>
+                                <span class="tech-tag">Action Planning</span>
+                                <span class="tech-tag">State Tracking</span>
+                                <span class="tech-tag">Decision Making</span>
+                            </div>
+                        </div>
+                        <div class="screenshot-box">
+                            <img src="/api/placeholder/400/150" alt="Reasoning process visualization" />
+                        </div>
+                    </div>
+    
+                    <!-- Action Execution -->
+                    <div class="component-card">
+                        <div class="component-header">
+                            <div class="component-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                            </div>
+                            <h3 class="component-title">Action Execution</h3>
+                        </div>
+                        <p>Executes planned actions through Selenium-powered web interaction</p>
+                        <div class="input-output">
+                            <div class="io-box">
+                                <div class="io-title">Actions</div>
+                                <span class="tech-tag">Click</span>
+                                <span class="tech-tag">Type</span>
+                                <span class="tech-tag">Scroll</span>
+                                <span class="tech-tag">Navigate</span>
+                            </div>
+                        </div>
+                        <div class="screenshot-box">
+                            <img src="/api/placeholder/400/150" alt="Action execution demo" />
                         </div>
                     </div>
                 </div>
     
-                <!-- Explore Step -->
-                <div class="step-card">
-                    <div class="step-number">2</div>
-                    <div class="step-icon">
-                        <img src="/api/placeholder/24/24" alt="Explore icon" />
-                    </div>
-                    <div class="step-content">
-                        <h3>Smart Exploration</h3>
-                        <p>Our agent intelligently navigates the web, finding and processing relevant information from multiple sources.</p>
-                        <div class="step-image">
-                            <img src="/api/placeholder/400/200" alt="Web exploration visualization" />
+                <!-- Environment Integration -->
+                <div class="component-card" style="margin-top: 2rem;">
+                    <div class="component-header">
+                        <div class="component-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            </svg>
                         </div>
-                        <div class="step-features">
-                            <span class="step-feature">Multi-source</span>
-                            <span class="step-feature">Intelligent Search</span>
-                        </div>
+                        <h3 class="component-title">Online Environment Integration</h3>
                     </div>
-                </div>
-    
-                <!-- Analyze Step -->
-                <div class="step-card">
-                    <div class="step-number">3</div>
-                    <div class="step-icon">
-                        <img src="/api/placeholder/24/24" alt="Analyze icon" />
-                    </div>
-                    <div class="step-content">
-                        <h3>Deep Analysis</h3>
-                        <p>Advanced AI processes and understands content, including text, images, and data structures.</p>
-                        <div class="step-image">
-                            <img src="/api/placeholder/400/200" alt="AI analysis visualization" />
+                    <p>Seamlessly interacts with real-world websites through a robust online browsing environment</p>
+                    <div class="input-output">
+                        <div class="io-box">
+                            <div class="io-title">Supported Platforms</div>
+                            <span class="tech-tag">E-commerce</span>
+                            <span class="tech-tag">Social Media</span>
+                            <span class="tech-tag">News Sites</span>
+                            <span class="tech-tag">Search Engines</span>
                         </div>
-                        <div class="step-features">
-                            <span class="step-feature">ML Processing</span>
-                            <span class="step-feature">Data Extraction</span>
-                        </div>
-                    </div>
-                </div>
-    
-                <!-- Deliver Step -->
-                <div class="step-card">
-                    <div class="step-number">4</div>
-                    <div class="step-icon">
-                        <img src="/api/placeholder/24/24" alt="Deliver icon" />
-                    </div>
-                    <div class="step-content">
-                        <h3>Comprehensive Results</h3>
-                        <p>Get organized, actionable results that combine information from multiple sources into a clear format.</p>
-                        <div class="step-image">
-                            <img src="/api/placeholder/400/200" alt="Results dashboard" />
-                        </div>
-                        <div class="step-features">
-                            <span class="step-feature">Structured Data</span>
-                            <span class="step-feature">Clear Insights</span>
+                        <div class="io-box">
+                            <div class="io-title">Technologies</div>
+                            <span class="tech-tag">Selenium</span>
+                            <span class="tech-tag">DOM Manipulation</span>
+                            <span class="tech-tag">Network Handling</span>
                         </div>
                     </div>
                 </div>
