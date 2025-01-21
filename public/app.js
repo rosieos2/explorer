@@ -335,37 +335,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize stats and chart
     updateStats();
     setInterval(updateStats, 30000); // Update every 30 seconds
-    initializeChart();
-
-    // Usage chart initialization
-    function initializeChart() {
-        const ctx = document.getElementById('usageChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [], // Will be populated with dates
-                datasets: [{
-                    label: 'Daily Prompts',
-                    data: [], // Will be populated with counts
-                    borderColor: getComputedStyle(document.documentElement)
-                        .getPropertyValue('--accent-color'),
-                    tension: 0.4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    }
 });
