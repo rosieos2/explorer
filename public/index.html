@@ -211,69 +211,92 @@
     background: var(--background-color);
 }
 
-.agent-architecture {
+.agent-workflow {
     margin-top: 3rem;
+    position: relative;
     background: var(--card-background);
     border-radius: 16px;
     padding: 2rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
-.workflow-diagram {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 2rem 0;
-    gap: 2rem;
-}
-
-.workflow-node {
-    position: relative;
-    padding: 1.5rem;
-    background: var(--background-color);
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-    min-width: 280px;
-}
-
-.workflow-arrow {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    color: var(--accent-color);
-}
-
-.code-block {
-    background: #1a1a1a;
-    border-radius: 8px;
-    padding: 1rem;
-    margin-top: 1rem;
-    overflow: auto;
-    max-height: 200px;
-    font-family: 'SF Mono', monospace;
-    font-size: 0.875rem;
-    color: #e2e8f0;
-}
-
-.code-label {
-    font-size: 0.75rem;
-    color: #a0aec0;
-    margin-bottom: 0.5rem;
-}
-
-.implementation-details {
-    margin-top: 3rem;
+.workflow-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    gap: 2rem;
+    margin-top: 2rem;
 }
 
-.detail-card {
+.component-card {
     background: var(--background-color);
     border-radius: 12px;
     padding: 1.5rem;
     border: 1px solid var(--border-color);
+}
+
+.component-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.component-icon {
+    width: 40px;
+    height: 40px;
+    background: var(--accent-color);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.component-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-color);
+}
+
+.data-flow {
+    position: relative;
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.flow-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--accent-color);
+    font-size: 1.5rem;
+}
+
+.flow-arrow.right {
+    right: -1.5rem;
+}
+
+.flow-arrow.left {
+    left: -1.5rem;
+}
+
+.input-output {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.io-box {
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.io-title {
+    font-size: 0.875rem;
+    color: var(--text-color);
+    opacity: 0.7;
+    margin-bottom: 0.5rem;
 }
 
 .tech-tag {
@@ -283,7 +306,8 @@
     padding: 0.25rem 0.75rem;
     border-radius: 12px;
     font-size: 0.75rem;
-    margin: 0.25rem;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
 }
 
 .screenshot-box {
@@ -1616,116 +1640,109 @@
         <div class="container">
             <h2>How It Works</h2>
             
-            <div class="agent-architecture">
-                <div class="workflow-diagram">
-                    <!-- Observation Node -->
-                    <div class="workflow-node">
-                        <h3>Multimodal Observation</h3>
-                        <div class="code-label">Screenshot & DOM Elements</div>
-                        <div class="code-block">
-                            <code>
-    def get_web_element_rect(browser):
-        # Get interactive elements
-        items = document.querySelectorAll('*')
-        # Add visual markers
-        items.forEach((item, index) => {
-            newElement = document.createElement("div")
-            newElement.style.outline = `2px dashed`
-        })
-                            </code>
+            <div class="agent-workflow">
+                <div class="workflow-grid">
+                    <!-- Multimodal Observation -->
+                    <div class="component-card">
+                        <div class="component-header">
+                            <div class="component-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                    <circle cx="12" cy="12" r="3"></circle>
+                                    <path d="M20.4 15a9 9 0 1 1-16.8 0"></path>
+                                </svg>
+                            </div>
+                            <h3 class="component-title">Multimodal Observation</h3>
+                        </div>
+                        <p>Integrates visual and textual information from web pages using advanced LMM capabilities</p>
+                        <div class="input-output">
+                            <div class="io-box">
+                                <div class="io-title">Inputs</div>
+                                <span class="tech-tag">Screenshots</span>
+                                <span class="tech-tag">DOM Elements</span>
+                                <span class="tech-tag">HTML Structure</span>
+                            </div>
                         </div>
                         <div class="screenshot-box">
-                            <img src="/api/placeholder/400/150" alt="DOM element detection" />
+                            <img src="/api/placeholder/400/150" alt="Visual observation demo" />
                         </div>
                     </div>
     
-                    <div class="workflow-arrow">→</div>
-    
-                    <!-- Reasoning Node -->
-                    <div class="workflow-node">
-                        <h3>LMM Reasoning</h3>
-                        <div class="code-label">GPT-4V Analysis</div>
-                        <div class="code-block">
-                            <code>
-    messages.append({
-        'role': 'user',
-        'content': [
-            {'type': 'text', 'text': init_msg},
-            {'type': 'image_url', 
-             'image_url': {'url': f"data:image/png;base64,{web_img_b64}"}}
-        ]
-    })
-                            </code>
+                    <!-- Reasoning Engine -->
+                    <div class="component-card">
+                        <div class="component-header">
+                            <div class="component-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                    <path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="component-title">Reasoning Engine</h3>
+                        </div>
+                        <p>Processes observations and plans actions using generalist planning approach</p>
+                        <div class="input-output">
+                            <div class="io-box">
+                                <div class="io-title">Capabilities</div>
+                                <span class="tech-tag">Action Planning</span>
+                                <span class="tech-tag">State Tracking</span>
+                                <span class="tech-tag">Decision Making</span>
+                            </div>
                         </div>
                         <div class="screenshot-box">
-                            <img src="/api/placeholder/400/150" alt="LMM reasoning process" />
+                            <img src="/api/placeholder/400/150" alt="Reasoning process visualization" />
                         </div>
                     </div>
     
-                    <div class="workflow-arrow">→</div>
-    
-                    <!-- Action Node -->
-                    <div class="workflow-node">
-                        <h3>Action Execution</h3>
-                        <div class="code-label">Selenium Integration</div>
-                        <div class="code-block">
-                            <code>
-    def exec_action_type(info, web_ele, driver):
-        actions = ActionChains(driver)
-        actions.click(web_ele)
-        actions.send_keys(type_content)
-        actions.perform()
-                            </code>
+                    <!-- Action Execution -->
+                    <div class="component-card">
+                        <div class="component-header">
+                            <div class="component-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                                </svg>
+                            </div>
+                            <h3 class="component-title">Action Execution</h3>
+                        </div>
+                        <p>Executes planned actions through Selenium-powered web interaction</p>
+                        <div class="input-output">
+                            <div class="io-box">
+                                <div class="io-title">Actions</div>
+                                <span class="tech-tag">Click</span>
+                                <span class="tech-tag">Type</span>
+                                <span class="tech-tag">Scroll</span>
+                                <span class="tech-tag">Navigate</span>
+                            </div>
                         </div>
                         <div class="screenshot-box">
-                            <img src="/api/placeholder/400/150" alt="Action execution" />
+                            <img src="/api/placeholder/400/150" alt="Action execution demo" />
                         </div>
                     </div>
                 </div>
     
-                <div class="implementation-details">
-                    <div class="detail-card">
-                        <h4>Environment Setup</h4>
-                        <span class="tech-tag">Selenium WebDriver</span>
-                        <span class="tech-tag">Chrome Options</span>
-                        <span class="tech-tag">DOM Manipulation</span>
-                        <div class="code-block">
-                            <code>
-    options = webdriver.ChromeOptions()
-    driver = webdriver.Chrome(options=options)
-    driver.set_window_size(width, height)
-                            </code>
+                <!-- Environment Integration -->
+                <div class="component-card" style="margin-top: 2rem;">
+                    <div class="component-header">
+                        <div class="component-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            </svg>
                         </div>
+                        <h3 class="component-title">Online Environment Integration</h3>
                     </div>
-    
-                    <div class="detail-card">
-                        <h4>Visual Processing</h4>
-                        <span class="tech-tag">Screenshot Analysis</span>
-                        <span class="tech-tag">Element Detection</span>
-                        <span class="tech-tag">Accessibility Tree</span>
-                        <div class="code-block">
-                            <code>
-    accessibility_tree = browser.execute_cdp_cmd(
-        "Accessibility.getFullAXTree", {}
-    )
-                            </code>
+                    <p>Seamlessly interacts with real-world websites through a robust online browsing environment</p>
+                    <div class="input-output">
+                        <div class="io-box">
+                            <div class="io-title">Supported Platforms</div>
+                            <span class="tech-tag">E-commerce</span>
+                            <span class="tech-tag">Social Media</span>
+                            <span class="tech-tag">News Sites</span>
+                            <span class="tech-tag">Search Engines</span>
                         </div>
-                    </div>
-    
-                    <div class="detail-card">
-                        <h4>Action Handling</h4>
-                        <span class="tech-tag">Click</span>
-                        <span class="tech-tag">Type</span>
-                        <span class="tech-tag">Scroll</span>
-                        <span class="tech-tag">Navigation</span>
-                        <div class="code-block">
-                            <code>
-    patterns = {
-        "click": r"Click \[?(\d+)\]?",
-        "type": r"Type \[?(\d+)\]?[; ]+\[?(.[^\]]*)\]?",
-        "scroll": r"Scroll \[?(\d+|WINDOW)\]?"
-    }
-                            </code>
+                        <div class="io-box">
+                            <div class="io-title">Technologies</div>
+                            <span class="tech-tag">Selenium</span>
+                            <span class="tech-tag">DOM Manipulation</span>
+                            <span class="tech-tag">Network Handling</span>
                         </div>
                     </div>
                 </div>
