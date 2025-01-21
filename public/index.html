@@ -1376,23 +1376,23 @@
         }
 
         .results-terminal {
-    margin-top: 20px;
-    background: rgba(0, 0, 0, 0.85);
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    max-height: 80vh;
-    width: 800px;
-    max-width: 90vw;
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1000;
-    display: none;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
+            margin: 0;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-height: 80vh;
+            width: 800px;
+            max-width: 90vw;
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) !important;
+            z-index: 1000;
+            display: none;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
         
         .results-terminal.active {
             display: block;
