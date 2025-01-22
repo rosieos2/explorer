@@ -7,7 +7,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<link rel="icon" type="image/png" href="https://cdn.prod.website-files.com/674396c59212c6ea348b24e0/678ff53958c6a238736cbb28_rosieexplorer.png">
+<link rel="icon" type="image/png" href="https://cdn.prod.website-files.com/674396c59212c6ea348b24e0/679022789a877ff5c7f22d52_New%20Project%20-%202025-01-21T224034.955.png">
     <style>
         :root {
             --primary-color: #2D3748;
@@ -2480,25 +2480,35 @@
         }
     
         function reappearCharacter() {
-            model.visible = true;
-            isDisappearing = true;
-            characterOpacity = 0;
+    // Make sure model exists
+    if (!model) return;
+    
+    // Reset flags and make visible immediately
+    model.visible = true;
+    isDisappearing = false;
+    characterOpacity = 0;
+    
+    // Create reappear animation
+    const reappearInterval = setInterval(() => {
+        if (characterOpacity < 1) {
+            characterOpacity += 0.02;
             
-            const reappearInterval = setInterval(() => {
-                if (characterOpacity < 1) {
-                    characterOpacity += 0.02;
-                    
-                    model.traverse((node) => {
-                        if (node.isMesh) {
-                            node.material.opacity = characterOpacity;
-                        }
-                    });
-                } else {
-                    clearInterval(reappearInterval);
-                    isDisappearing = false;
+            model.traverse((node) => {
+                if (node.isMesh) {
+                    node.material.opacity = characterOpacity;
                 }
-            }, 16);
+            });
+        } else {
+            clearInterval(reappearInterval);
+            // Ensure full opacity at end
+            model.traverse((node) => {
+                if (node.isMesh) {
+                    node.material.opacity = 1;
+                }
+            });
         }
+    }, 16);
+}
     
         // Animation loop with clock
         const clock = new THREE.Clock();
