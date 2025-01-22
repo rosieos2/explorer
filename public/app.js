@@ -64,8 +64,9 @@ if (resultsTerminal && minimizeBtn) {
                 const searchTerm = searchInput.value.toLowerCase();
                 terminalContent.innerHTML = '';
                 
+                // Get prompts but keep them in chronological order (oldest first)
                 const prompts = data.prompts || [];
-                prompts.forEach(prompt => {
+                prompts.reverse().forEach(prompt => {
                     const line = createTerminalLine(prompt.prompt, prompt.timestamp);
                     
                     // Apply current search filter
@@ -76,12 +77,13 @@ if (resultsTerminal && minimizeBtn) {
                     terminalContent.appendChild(line);
                 });
                 
-                // Add typing animation to the latest prompt
+                // Add typing animation to the newest prompt (now at the bottom)
                 if (prompts.length > 0) {
                     const latestLine = terminalContent.lastElementChild;
                     latestLine.querySelector('.terminal-command').classList.add('typing');
                 }
-
+    
+                // Scroll to show latest prompts
                 terminalContent.scrollTop = terminalContent.scrollHeight;
             })
             .catch(error => console.error('Error fetching prompts:', error));
